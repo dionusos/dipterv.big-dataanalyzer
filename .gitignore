@@ -3,3 +3,4 @@ gradle
 gradlew*
 .idea
 .gradle
+xsd/src/main/java/

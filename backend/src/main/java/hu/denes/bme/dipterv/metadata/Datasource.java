@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Datasource {
 
-    List<KpiMeta> getKpis() {
+    List<Kpi> getKpis() {
         return new ArrayList<>();
     }
 }

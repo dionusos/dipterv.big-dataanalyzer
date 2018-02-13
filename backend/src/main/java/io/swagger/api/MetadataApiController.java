@@ -29,7 +29,7 @@ import javax.validation.Valid;
 public class MetadataApiController implements MetadataApi {
 
     @Autowired
-    private MetadataProvider metadataProvider;
+    MetadataProvider metadataProvider;
 
     public ResponseEntity<DimensionList> metadataDatasourceDatasourceIdDimensionListGet(@ApiParam(value = "",required=true ) @PathVariable("datasourceId") String datasourceId) {
         // do some magic!
@@ -43,7 +43,7 @@ public class MetadataApiController implements MetadataApi {
 
     public ResponseEntity<KpiList> metadataDatasourceDatasourceIdKpiListGet(@ApiParam(value = "",required=true ) @PathVariable("datasourceId") String datasourceId) {
         // do some magic!
-        return new ResponseEntity<KpiList>(HttpStatus.OK);
+        return new ResponseEntity<KpiList>(metadataProvider.getKpisFor(datasourceId), HttpStatus.OK);
     }
 
     public ResponseEntity<Datasources> metadataDatasourcesGet() {

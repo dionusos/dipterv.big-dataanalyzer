@@ -2,49 +2,50 @@
     <xs:element name="metadata">
         <xs:complexType>
             <xs:sequence>
-                <xs:element name="baseMetricCalculation" maxOccurs="unbounded" minOccurs="0">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element type="xs:string" name="name"/>
-                            <xs:element type="xs:string" name="calculation"/>
-                        </xs:sequence>
-                    </xs:complexType>
-                </xs:element>
-                <xs:element name="kpi" maxOccurs="unbounded" minOccurs="0">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element type="xs:string" name="name"/>
-                            <xs:element name="column" maxOccurs="unbounded" minOccurs="0">
-                                <xs:complexType>
-                                    <xs:sequence>
-                                        <xs:element type="xs:string" name="postfix"/>
-                                        <xs:element type="xs:string" name="datatype"/>
-                                    </xs:sequence>
-                                </xs:complexType>
-                            </xs:element>
-                            <xs:element name="offeredMetric" maxOccurs="unbounded" minOccurs="0">
-                                <xs:complexType>
-                                    <xs:sequence>
-                                        <xs:element type="xs:string" name="name"/>
-                                        <xs:element type="xs:string" name="calculation" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="friendlyName" minOccurs="0"/>
-                                        <xs:element type="xs:string" name="description" minOccurs="0"/>
-                                    </xs:sequence>
-                                </xs:complexType>
-                            </xs:element>
-                        </xs:sequence>
-                    </xs:complexType>
-                </xs:element>
-                <xs:element name="dimension" maxOccurs="unbounded" minOccurs="0">
-                    <xs:complexType>
-                        <xs:sequence>
-                            <xs:element type="xs:string" name="name"/>
-                            <xs:element type="xs:string" name="friendlyName" minOccurs="0"/>
-                            <xs:element type="xs:string" name="datatype"/>
-                        </xs:sequence>
-                    </xs:complexType>
-                </xs:element>
+                <xs:element type="BaseMetricCalculation" name="baseMetricCalculation" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element type="Kpi" name="kpi" maxOccurs="unbounded" minOccurs="0" />
+                <xs:element type="Dimension" name="dimension" maxOccurs="unbounded" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
+
+    <xs:complexType name="BaseMetricCalculation">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:string" name="calculation"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Kpi">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:string" name="friendlyName"/>
+            <xs:element type="Column" name="column" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="OfferedMetric" name="offeredMetric" maxOccurs="unbounded" minOccurs="0" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Column">
+        <xs:sequence>
+            <xs:element type="xs:string" name="postfix"/>
+            <xs:element type="xs:string" name="datatype"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="OfferedMetric">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:string" name="calculation"/>
+            <xs:element type="xs:string" name="friendlyName"/>
+            <xs:element type="xs:string" name="description"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="Dimension">
+        <xs:sequence>
+            <xs:element type="xs:string" name="name"/>
+            <xs:element type="xs:string" name="friendlyName" minOccurs="0"/>
+            <xs:element type="xs:string" name="datatype"/>
+        </xs:sequence>
+    </xs:complexType>
 </xs:schema>

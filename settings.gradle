@@ -1,5 +1,5 @@
 rootProject.name = 'dipterv.big-dataanalyzer'
-include 'backend'
-include 'gui'
 include 'xsd'
+include 'backend'
+include 'example'
 

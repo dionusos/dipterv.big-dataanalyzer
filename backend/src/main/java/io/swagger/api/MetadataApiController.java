@@ -47,8 +47,8 @@ public class MetadataApiController implements MetadataApi {
     }
 
     public ResponseEntity<Datasources> metadataDatasourcesGet() {
-        // do some magic!
-        return new ResponseEntity<Datasources>(HttpStatus.OK);
+        Datasources datasources = metadataProvider.getDatasources();
+        return new ResponseEntity<Datasources>(datasources, HttpStatus.OK);
     }
 
 }

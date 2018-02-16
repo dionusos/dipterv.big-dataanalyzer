@@ -1,0 +1,86 @@
+<html>
+	<head>
+		<style>
+			div { border:1px solid black; padding: 1px; overflow: hidden; }
+			.breakdown { width: 500px; }
+			.measurement { display: inline-block; }
+			.measurements { overflow: scroll; white-space: nowrap; }
+			.frame { border:1px solid purple; }
+            #addNewMeasurement { height: 300px; width: 300px; display: block;}
+		</style>
+		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function (ev) {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                    var datasourceList = JSON.parse(xmlHttp.responseText);
+                    for (var i in datasourceList) {
+                        var ds = datasourceList[i];
+                        var opt = document.createElement("option");
+                        opt.value = ds.name;
+                        opt.text = ds.displayName;
+                        document.getElementById("datasourceSelector").appendChild(opt);
+                    }
+                datasourceSelected();
+            }
+            xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasources", true ); // false for synchronous request
+            xmlHttp.send( null );
+            return xmlHttp.responseText;
+		});
+
+        function datasourceSelected() {
+            var selectBox = document.getElementById("datasourceSelector");
+            var selectedValue = selectBox.options[selectBox.selectedIndex].value;
+
+            var myNode = document.getElementById("kpisSelector");
+            while (myNode.firstChild) {
+                myNode.removeChild(myNode.firstChild);
+            }
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                    var kpis = JSON.parse(xmlHttp.responseText);
+                for (var i in kpis) {
+                    var kpi = kpis[i];
+                    var opt = document.createElement("option");
+                    opt.value = kpi.name;
+                    opt.text = kpi.displayName;
+                    document.getElementById("kpisSelector").appendChild(opt);
+                }
+
+            }
+            xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/kpi/list", true );
+            xmlHttp.send( null );
+            return xmlHttp.responseText;
+        }
+
+	</script>
+	</head>
+	<body>
+		<div id="title"><h1>BIG data-analyzer</h1></div>
+		<div class="frame">
+			<div class="measurements" id="measurements">
+				<div class="measurement" id="measurement1">
+					<div class="measurementTitle"><h2>Measurement 1</h2></div>
+					<div class="breakdown" id="piechart">
+					</div>
+					<div class="breakdown" id="piechart2">
+					</div>
+					<div class="breakdown" id="piechart3">
+					</div>
+					<div class="measurementFooterButtons"><button id="newBreakdown" onclick="addNewBreakdown()">Button</button></div>
+				</div>
+				<div id="addNewMeasurement">
+					<h2>Add new measurement</h2>
+					<select id="datasourceSelector" onchange="datasourceSelected()">
+					</select>
+					<br>
+					<select id="kpisSelector" multiple>
+					</select>
+					<button id="newMeasurementButton" onclick="addNewMeasurement()">Add new</button>
+				</div>
+			</div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasource
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../xsd/src/main/resources/datasource.xsd">
+    <name>example2</name>
+    <friendlyName>Second Example datasource</friendlyName>
+    <url>jdbc:mysql://localhost:3306/example</url>
+
+</datasource>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemas
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../xsd/src/main/resources/schema.xsd">
+    <schema name="example">
+        <table name="weather" resolution="1"/>
+        <kpi name="temperature" metric="min"/>
+        <kpi name="temperature" metric="max"/>
+        <dimension name="date"/>
+    </schema>
+</schemas>

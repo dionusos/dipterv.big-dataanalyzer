@@ -1,0 +1,32 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+    <xs:element name="schemas">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element type="Schema" name="schema" maxOccurs="unbounded" minOccurs="0"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="Schema">
+        <xs:sequence>
+            <xs:element type="Table" name="table" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="Dimension" name="dimension" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="Kpi" name="kpi" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="name"/>
+    </xs:complexType>
+
+    <xs:complexType name="Table">
+        <xs:attribute type="xs:string" name="name"/>
+        <xs:attribute type="xs:integer" name="resolution"/>
+    </xs:complexType>
+
+    <xs:complexType name="Kpi">
+        <xs:attribute type="xs:string" name="name"/>
+        <xs:attribute type="xs:string" name="metric"/>
+    </xs:complexType>
+
+    <xs:complexType name="Dimension">
+        <xs:attribute type="xs:string" name="name"/>
+    </xs:complexType>
+</xs:schema>

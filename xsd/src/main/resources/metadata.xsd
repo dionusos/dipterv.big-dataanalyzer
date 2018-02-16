@@ -3,8 +3,8 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element type="BaseMetricCalculation" name="baseMetricCalculation" maxOccurs="unbounded" minOccurs="0"/>
-                <xs:element type="Kpi" name="kpi" maxOccurs="unbounded" minOccurs="0" />
-                <xs:element type="Dimension" name="dimension" maxOccurs="unbounded" minOccurs="0"/>
+                <xs:element type="KpiDef" name="kpi" maxOccurs="unbounded" minOccurs="0" />
+                <xs:element type="DimensionDef" name="dimension" maxOccurs="unbounded" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -16,7 +16,7 @@
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="Kpi">
+    <xs:complexType name="KpiDef">
         <xs:sequence>
             <xs:element type="xs:string" name="name"/>
             <xs:element type="xs:string" name="friendlyName"/>
@@ -28,7 +28,7 @@
     <xs:complexType name="Column">
         <xs:sequence>
             <xs:element type="xs:string" name="postfix"/>
-            <xs:element type="xs:string" name="datatype"/>
+            <xs:element type="DataType" name="datatype"/>
         </xs:sequence>
     </xs:complexType>
 
@@ -36,16 +36,22 @@
         <xs:sequence>
             <xs:element type="xs:string" name="name"/>
             <xs:element type="xs:string" name="calculation"/>
-            <xs:element type="xs:string" name="friendlyName"/>
-            <xs:element type="xs:string" name="description"/>
+            <xs:element type="xs:string" name="friendlyName" minOccurs="0"/>
+            <xs:element type="xs:string" name="description" minOccurs="0"/>
         </xs:sequence>
     </xs:complexType>
 
-    <xs:complexType name="Dimension">
+    <xs:complexType name="DimensionDef">
         <xs:sequence>
             <xs:element type="xs:string" name="name"/>
             <xs:element type="xs:string" name="friendlyName" minOccurs="0"/>
-            <xs:element type="xs:string" name="datatype"/>
+            <xs:element type="DataType" name="datatype"/>
         </xs:sequence>
     </xs:complexType>
+
+    <xs:simpleType name="DataType">
+        <xs:restriction base="xs:string">
+            <xs:pattern value="INT16|INT32|INT64|FLOAT|STRING|BOOLEAN"/>
+        </xs:restriction>
+    </xs:simpleType>
 </xs:schema>

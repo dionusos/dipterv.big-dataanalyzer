@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../xsd/src/main/resources/metadata.xsd">
+    <kpi>
+        <name>temperature</name>
+        <friendlyName>Temperature</friendlyName>
+        <offeredMetric>
+            <name>min</name>
+            <calculation></calculation>
+            <friendlyName>Minimum</friendlyName>
+            <description></description>
+        </offeredMetric>
+        <offeredMetric>
+            <name>max</name>
+            <calculation></calculation>
+            <friendlyName>Maximum</friendlyName>
+            <description></description>
+        </offeredMetric>
+        <column>
+            <postfix>min</postfix>
+            <datatype>FLOAT</datatype>
+        </column>
+        <column>
+            <postfix>max</postfix>
+            <datatype>FLOAT</datatype>
+        </column>
+    </kpi>
+    <dimension>
+        <name>date</name>
+        <friendlyName>Date</friendlyName>
+        <datatype>DATE</datatype>
+    </dimension>
+</metadata>

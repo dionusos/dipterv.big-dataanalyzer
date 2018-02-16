@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<fileDatasource
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:noNamespaceSchemaLocation="../../../../xsd/src/main/resources/file_datasource.xsd">
-    <name>example</name>
-    <friendlyName>Example datasource</friendlyName>
-    <path>example.csv</path>
-
-</fileDatasource>

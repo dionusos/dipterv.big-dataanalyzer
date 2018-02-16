@@ -29,5 +29,7 @@ dependencies {
     compile("org.thymeleaf:thymeleaf-spring4")
     compile("nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect")
 
+    compile group: 'mysql', name: 'mysql-connector-java', version: '6.0.6'
+
     compile project(":xsd")
 }

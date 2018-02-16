@@ -33,7 +33,7 @@ public class MetadataApiController implements MetadataApi {
 
     public ResponseEntity<DimensionList> metadataDatasourceDatasourceIdDimensionListGet(@ApiParam(value = "",required=true ) @PathVariable("datasourceId") String datasourceId) {
         // do some magic!
-        return new ResponseEntity<DimensionList>(HttpStatus.OK);
+        return new ResponseEntity<DimensionList>(metadataProvider.getDimensionsFor(datasourceId),HttpStatus.OK);
     }
 
     public ResponseEntity<Datasource> metadataDatasourceDatasourceIdGet(@ApiParam(value = "ID of datasource that needs to be fetched",required=true ) @PathVariable("datasourceId") String datasourceId) {

@@ -5,5 +5,7 @@
     <name>example1</name>
     <friendlyName>First Example datasource</friendlyName>
     <url>jdbc:mysql://localhost:3306/example</url>
+    <user>example</user>
+    <password>password</password>
 
 </datasource>

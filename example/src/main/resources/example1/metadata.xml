@@ -7,13 +7,13 @@
         <friendlyName>Temperature</friendlyName>
         <offeredMetric>
             <name>min</name>
-            <calculation></calculation>
+            <calculation>min(temperaturemin)</calculation>
             <friendlyName>Minimum</friendlyName>
             <description></description>
         </offeredMetric>
         <offeredMetric>
             <name>max</name>
-            <calculation></calculation>
+            <calculation>max(temperaturemax)</calculation>
             <friendlyName>Maximum</friendlyName>
             <description></description>
         </offeredMetric>
@@ -26,9 +26,136 @@
             <datatype>FLOAT</datatype>
         </column>
     </kpi>
+    <kpi>
+        <name>precipitation</name>
+        <friendlyName>Precipitation</friendlyName>
+        <offeredMetric>
+            <name>sum</name>
+            <calculation>sum(precipitation)</calculation>
+            <friendlyName></friendlyName>
+            <description></description>
+        </offeredMetric>
+        <column>
+            <postfix></postfix>
+            <datatype>FLOAT</datatype>
+        </column>
+    </kpi>
+    <kpi>
+        <name>snowfall</name>
+        <friendlyName>Snowfall</friendlyName>
+        <offeredMetric>
+            <name>sum</name>
+            <calculation>sum(snowfall)</calculation>
+            <friendlyName></friendlyName>
+            <description></description>
+        </offeredMetric>
+        <column>
+            <postfix></postfix>
+            <datatype>FLOAT</datatype>
+        </column>
+    </kpi>
+    <kpi>
+        <name>snowdepth</name>
+        <friendlyName>Snowdepth</friendlyName>
+        <offeredMetric>
+            <name>sum</name>
+            <calculation>sum(dnowdepth)</calculation>
+            <friendlyName></friendlyName>
+            <description></description>
+        </offeredMetric>
+        <column>
+            <postfix></postfix>
+            <datatype>FLOAT</datatype>
+        </column>
+    </kpi>
     <dimension>
         <name>date</name>
         <friendlyName>Date</friendlyName>
-        <datatype>DATE</datatype>
+        <datatype>STRING</datatype>
+    </dimension>
+    <dimension>
+        <name>fog</name>
+        <friendlyName>Fog</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>fogheavy</name>
+        <friendlyName>Heavy fog</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>mist</name>
+        <friendlyName>Mist</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>rain</name>
+        <friendlyName>Rain</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>fogground</name>
+        <friendlyName>Fog ground</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>ice</name>
+        <friendlyName>Ice</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>glaze</name>
+        <friendlyName>Glaze</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>drizzle</name>
+        <friendlyName>Drizzle</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>snow</name>
+        <friendlyName>Snow</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>freezingrain</name>
+        <friendlyName>Freezing rain</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>smokehaze</name>
+        <friendlyName>Smoke haze</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>thunder</name>
+        <friendlyName>Thunder</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>highwind</name>
+        <friendlyName>High wind</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>hail</name>
+        <friendlyName>Hail</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>blowingsnow</name>
+        <friendlyName>Blowing snow</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>dust</name>
+        <friendlyName>Dust</friendlyName>
+        <datatype>BOOLEAN</datatype>
+    </dimension>
+    <dimension>
+        <name>freezingfog</name>
+        <friendlyName>Fog freezing</friendlyName>
+        <datatype>BOOLEAN</datatype>
     </dimension>
 </metadata>

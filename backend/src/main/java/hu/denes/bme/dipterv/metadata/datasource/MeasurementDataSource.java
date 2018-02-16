@@ -1,7 +1,11 @@
 package hu.denes.bme.dipterv.metadata.datasource;
 
 import hu.denes.bme.dipterv.metadata.Datasource;
+import hu.denes.bme.dipterv.metadata.DimensionDef;
+import hu.denes.bme.dipterv.metadata.Kpi;
+import hu.denes.bme.dipterv.metadata.KpiDef;
 import hu.denes.bme.dipterv.metadata.Metadata;
+import hu.denes.bme.dipterv.metadata.OfferedMetric;
 import hu.denes.bme.dipterv.metadata.Schemas;
 
 public class MeasurementDataSource {
@@ -41,5 +45,30 @@ public class MeasurementDataSource {
 
     public void setSchemas(Schemas schemas) {
         this.schemas = schemas;
+    }
+
+    public KpiDef getKpiFor(String name, String offeredMetric) {
+        KpiDef kpi = null;
+        for(KpiDef k : metadata.getKpi()) {
+            if(!k.getName().equals(name)){
+                continue;
+            }
+            for(OfferedMetric om : k.getOfferedMetric()){
+                if(!om.getName().equals(offeredMetric)){
+                    continue;
+                }
+                kpi = k;
+            }
+        }
+        return kpi;
+    }
+
+    public DimensionDef getDimensionFor(String name) {
+        for(DimensionDef dd : metadata.getDimension()) {
+            if(dd.getName().equals(name)){
+                return dd;
+            }
+        }
+        return null;
     }
 }

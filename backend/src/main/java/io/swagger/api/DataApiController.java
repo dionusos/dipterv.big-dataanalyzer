@@ -1,10 +1,12 @@
 package io.swagger.api;
 
+import hu.denes.bme.dipterv.data.DataProvider;
 import io.swagger.model.DataRequest;
 import io.swagger.model.DataResponse;
 
 import io.swagger.annotations.*;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -24,11 +26,12 @@ import javax.validation.Valid;
 @Controller
 public class DataApiController implements DataApi {
 
-
+    @Autowired
+    private DataProvider dataProvider;
 
     public ResponseEntity<DataResponse> dataPost(@ApiParam(value = ""  )  @Valid @RequestBody DataRequest body) {
-        // do some magic!
-        return new ResponseEntity<DataResponse>(HttpStatus.OK);
+        DataResponse response = dataProvider.getData(body);
+        return new ResponseEntity<DataResponse>(response, HttpStatus.OK);
     }
 
 }

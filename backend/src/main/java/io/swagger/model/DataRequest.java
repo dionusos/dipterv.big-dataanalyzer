@@ -16,9 +16,12 @@ import javax.validation.constraints.*;
 /**
  * DataRequest
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-13T21:19:23.429Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-16T19:53:36.064Z")
 
 public class DataRequest   {
+  @JsonProperty("datasource")
+  private String datasource = null;
+
   @JsonProperty("kpis")
   private List<KpiRequest> kpis = null;
 
@@ -27,6 +30,26 @@ public class DataRequest   {
 
   @JsonProperty("filters")
   private List<FilterRequest> filters = null;
+
+  public DataRequest datasource(String datasource) {
+    this.datasource = datasource;
+    return this;
+  }
+
+   /**
+   * Get datasource
+   * @return datasource
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public String getDatasource() {
+    return datasource;
+  }
+
+  public void setDatasource(String datasource) {
+    this.datasource = datasource;
+  }
 
   public DataRequest kpis(List<KpiRequest> kpis) {
     this.kpis = kpis;
@@ -125,14 +148,15 @@ public class DataRequest   {
       return false;
     }
     DataRequest dataRequest = (DataRequest) o;
-    return Objects.equals(this.kpis, dataRequest.kpis) &&
+    return Objects.equals(this.datasource, dataRequest.datasource) &&
+        Objects.equals(this.kpis, dataRequest.kpis) &&
         Objects.equals(this.dimensions, dataRequest.dimensions) &&
         Objects.equals(this.filters, dataRequest.filters);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(kpis, dimensions, filters);
+    return Objects.hash(datasource, kpis, dimensions, filters);
   }
 
   @Override
@@ -140,6 +164,7 @@ public class DataRequest   {
     StringBuilder sb = new StringBuilder();
     sb.append("class DataRequest {\n");
     
+    sb.append("    datasource: ").append(toIndentedString(datasource)).append("\n");
     sb.append("    kpis: ").append(toIndentedString(kpis)).append("\n");
     sb.append("    dimensions: ").append(toIndentedString(dimensions)).append("\n");
     sb.append("    filters: ").append(toIndentedString(filters)).append("\n");

@@ -33,4 +33,8 @@ public class MetadataProvider {
         kpiList.add(new Kpi().name("temperature").displayName("Temperature"));
         return kpiList;
     }
+
+    public MeasurementDataSource getMeasurementDataSourceByName(final String name) {
+        return fileDatasourceProvider.getMeasurementDataSource(name);
+    }
 }

@@ -6,7 +6,9 @@ import hu.denes.bme.dipterv.metadata.Schemas;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Service;
 @Service
 public class DatasourceProvider {
     private List<MeasurementDataSource> datasources = new ArrayList<>();
+
+    private Map<String, MeasurementDataSource> nameToDatasource = new HashMap<>();
 
     @PostConstruct
     public void init() {
@@ -64,5 +68,10 @@ public class DatasourceProvider {
             return;
         }
         datasources.add(measurementDataSource);
+        nameToDatasource.put(measurementDataSource.getDatasource().getName(), measurementDataSource);
+    }
+
+    public MeasurementDataSource getMeasurementDataSource(final String name) {
+        return nameToDatasource.get(name);
     }
 }

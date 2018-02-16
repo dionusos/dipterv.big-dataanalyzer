@@ -10,10 +10,12 @@
 		</style>
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
+        google.charts.load('current', {'packages':['corechart']});
+
         document.addEventListener("DOMContentLoaded", function (ev) {
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
                     var datasourceList = JSON.parse(xmlHttp.responseText);
                     for (var i in datasourceList) {
                         var ds = datasourceList[i];
@@ -22,7 +24,8 @@
                         opt.text = ds.displayName;
                         document.getElementById("datasourceSelector").appendChild(opt);
                     }
-                datasourceSelected();
+                    datasourceSelected();
+                }
             }
             xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasources", true ); // false for synchronous request
             xmlHttp.send( null );
@@ -39,20 +42,72 @@
             }
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
                     var kpis = JSON.parse(xmlHttp.responseText);
-                for (var i in kpis) {
-                    var kpi = kpis[i];
-                    var opt = document.createElement("option");
-                    opt.value = kpi.name;
-                    opt.text = kpi.displayName;
-                    document.getElementById("kpisSelector").appendChild(opt);
+                    for (var i in kpis) {
+                        var kpi = kpis[i];
+                        var opt = document.createElement("option");
+                        opt.value = kpi.name;
+                        opt.text = kpi.displayName;
+                        document.getElementById("kpisSelector").appendChild(opt);
+                    }
                 }
 
             }
             xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/kpi/list", true );
             xmlHttp.send( null );
             return xmlHttp.responseText;
+        }
+
+        function addNewMeasurement() {
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                    var dataResponse = JSON.parse(xmlHttp.responseText);
+                    var header = []
+                    for (var i in dataResponse.header) {
+                        var h = dataResponse.header[i]
+                        if (h.kpi === null) {
+                            header.push(h.dimension);
+                        } else {
+                            header.push(h.kpi);
+                        }
+                    }
+
+                    var dataMatrix = [];
+                    for (var i in dataResponse.dataMatrix) {
+                        var row = dataResponse.dataMatrix[i]
+                        var dataRow = []
+                        for (var j in row) {
+                            dataRow.push(row[j])
+                        }
+                        dataMatrix.push(dataRow);
+                    }
+
+                    drawChart(header, dataMatrix);
+                }
+            }
+            xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
+            xmlHttp.setRequestHeader("Content-type", "application/json");
+            var params = {"datasource": "example1"}
+            xmlHttp.send( JSON.stringify(params));
+            return xmlHttp.responseText;
+        }
+
+        function drawChart(header, dataMatrix) {
+            var mix = [];
+            mix.push(header);
+            for(var i in dataMatrix) {
+                mix.push(dataMatrix[i]);
+            }
+            var data = google.visualization.arrayToDataTable(mix);
+
+            var options = {
+                title: 'My Daily Activities'
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+            chart.draw(data, options);
         }
 
 	</script>
@@ -64,10 +119,6 @@
 				<div class="measurement" id="measurement1">
 					<div class="measurementTitle"><h2>Measurement 1</h2></div>
 					<div class="breakdown" id="piechart">
-					</div>
-					<div class="breakdown" id="piechart2">
-					</div>
-					<div class="breakdown" id="piechart3">
 					</div>
 					<div class="measurementFooterButtons"><button id="newBreakdown" onclick="addNewBreakdown()">Button</button></div>
 				</div>

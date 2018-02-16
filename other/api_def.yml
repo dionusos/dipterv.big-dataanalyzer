@@ -163,6 +163,8 @@ definitions:
   DataRequest:
     type: "object"
     properties:
+      datasource:
+        type: "string"
       kpis:
         type: "array"
         items:

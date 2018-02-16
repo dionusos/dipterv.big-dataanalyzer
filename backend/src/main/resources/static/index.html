@@ -60,16 +60,28 @@
         }
 
         function addNewMeasurement() {
+            var selectBox = document.getElementById("datasourceSelector");
+            var selectedDatasource = selectBox.options[selectBox.selectedIndex].value;
+
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
                 if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
                     var dataResponse = JSON.parse(xmlHttp.responseText);
                     var header = []
+
+                    var dimensionIndex = 0;
                     for (var i in dataResponse.header) {
                         var h = dataResponse.header[i]
                         if (h.kpi === null) {
-                            header.push(h.dimension);
-                        } else {
+                            dimensionIndex = i;
+                            break;
+                        }
+                    }
+
+                    header.push(dataResponse.header[dimensionIndex].dimension);
+                    for (var i in dataResponse.header) {
+                        var h = dataResponse.header[i]
+                        if (i != dimensionIndex) {
                             header.push(h.kpi);
                         }
                     }
@@ -78,8 +90,16 @@
                     for (var i in dataResponse.dataMatrix) {
                         var row = dataResponse.dataMatrix[i]
                         var dataRow = []
+                        dataRow.push(row[dimensionIndex])
                         for (var j in row) {
-                            dataRow.push(row[j])
+                            if (j != dimensionIndex) {
+                                var val = parseFloat(row[j]);
+                                if(val == parseInt(row[j])) {
+                                    val = parseInt(row[j]);
+                                }
+
+                                dataRow.push(val)
+                            }
                         }
                         dataMatrix.push(dataRow);
                     }
@@ -89,7 +109,9 @@
             }
             xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
             xmlHttp.setRequestHeader("Content-type", "application/json");
-            var params = {"datasource": "example1"}
+            var params = {"datasource": selectedDatasource,
+                "kpis": [{"name": "temperature", "offeredMetric": "min"}],
+                "dimensions": [{"name": "thunder"}]};
             xmlHttp.send( JSON.stringify(params));
             return xmlHttp.responseText;
         }
@@ -106,7 +128,7 @@
                 title: 'My Daily Activities'
             };
 
-            var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+            var chart = new google.visualization.ColumnChart(document.getElementById('piechart'));
             chart.draw(data, options);
         }
 

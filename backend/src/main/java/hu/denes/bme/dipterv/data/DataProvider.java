@@ -66,7 +66,9 @@ public class DataProvider {
             props.setProperty("serverTimezone", "UTC");
             conn = DriverManager.getConnection(q.getUrl(),  props);
             Statement statement = conn.createStatement();
-            ResultSet rs = statement.executeQuery(q.toString());
+            String queryString = q.toString();
+            System.out.println("Running query: [" + queryString + "]");
+            ResultSet rs = statement.executeQuery(queryString);
             List<List<String>> mx = new ArrayList<>();
             while (rs.next()) {
                 List<String> row = new ArrayList<>();

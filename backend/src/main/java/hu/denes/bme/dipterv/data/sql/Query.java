@@ -78,7 +78,7 @@ public class Query {
             Select s = it.next();
             sb.append(s.getCalculation()).append(" as ").append(s.getAlias());
             if(it.hasNext()){
-                sb.append(",");
+                sb.append(", ");
             }
         }
 
@@ -96,8 +96,8 @@ public class Query {
         while (itgb.hasNext()){
             String s = itgb.next();
             sb.append(s);
-            if(it.hasNext()){
-                sb.append(",");
+            if(itgb.hasNext()){
+                sb.append(", ");
             }
         }
 

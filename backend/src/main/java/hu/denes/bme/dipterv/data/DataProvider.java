@@ -72,34 +72,35 @@ public class DataProvider {
         }
 
         Expression lastExpression = new Expression("true");
-        for(FilterRequest filterRequest : request.getFilters()){
-            And exp = new And();
-            exp.left(lastExpression);
-            if(filterRequest.getDimension() != null) {
-                if(filterRequest.getIsNegative()) {
-                    if(filterRequest.getValue() != null) {
-                        exp.right(new Not(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getValue()))));
+        if(request.getFilters() != null) {
+            for (FilterRequest filterRequest : request.getFilters()) {
+                And exp = new And();
+                exp.left(lastExpression);
+                if (filterRequest.getDimension() != null) {
+                    if (filterRequest.getIsNegative()) {
+                        if (filterRequest.getValue() != null) {
+                            exp.right(new Not(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getValue()))));
+                        } else {
+                            Expression left = new GreaterThan().left(new Expression(filterRequest.getInterval().getLower())).right(new Expression(filterRequest.getDimension()));
+                            Expression right = new GreaterOrEquals().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getInterval().getUpper()));
+                            And a = new And(left, right);
+                            exp.right(a);
+                        }
                     } else {
-                        Expression left = new GreaterThan().left(new Expression(filterRequest.getInterval().getLower())).right(new Expression(filterRequest.getDimension()));
-                        Expression right = new GreaterOrEquals().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getInterval().getUpper()));
-                        And a = new And(left, right);
-                        exp.right(a);
-                    }
-                } else {
-                    if(filterRequest.getValue() != null) {
-                        exp.right(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getValue())));
-                    } else {
-                        Expression left = new LessOrEquals().left(new Expression(filterRequest.getInterval().getLower())).right(new Expression(filterRequest.getDimension()));
-                        Expression right = new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getInterval().getUpper()));
-                        And a = new And(left, right);
-                        exp.right(a);
+                        if (filterRequest.getValue() != null) {
+                            exp.right(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getValue())));
+                        } else {
+                            Expression left = new LessOrEquals().left(new Expression(filterRequest.getInterval().getLower())).right(new Expression(filterRequest.getDimension()));
+                            Expression right = new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getInterval().getUpper()));
+                            And a = new And(left, right);
+                            exp.right(a);
+                        }
                     }
                 }
+                lastExpression = exp;
             }
-            lastExpression = exp;
+            q.setWhere(lastExpression);
         }
-
-        q.setWhere(lastExpression);
 
         response.setHeader(header);
 

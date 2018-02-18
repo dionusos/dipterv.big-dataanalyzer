@@ -91,8 +91,10 @@ public class Query {
             sb.append(table);
         }
 
-        sb.append(" WHERE ");
-        sb.append(where.toString());
+        if(where != null) {
+            sb.append(" WHERE ");
+            sb.append(where.toString());
+        }
 
         sb.append(" GROUP BY ");
         Iterator<String> itgb = groupBys.iterator();

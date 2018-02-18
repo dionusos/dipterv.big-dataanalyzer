@@ -18,6 +18,7 @@ public class Query {
     private String table;
 
     private MetadataProvider metadataProvider;
+    private Expression where;
 
     public void addKpi(KpiDef kDef, String offeredMetric){
         String calculation = "";
@@ -90,6 +91,9 @@ public class Query {
             sb.append(table);
         }
 
+        sb.append(" WHERE ");
+        sb.append(where.toString());
+
         sb.append(" GROUP BY ");
         Iterator<String> itgb = groupBys.iterator();
         while (itgb.hasNext()){
@@ -109,5 +113,9 @@ public class Query {
 
     public void setTable(String table) {
         this.table = table;
+    }
+
+    public void setWhere(Expression where) {
+        this.where = where;
     }
 }

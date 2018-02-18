@@ -1,5 +1,6 @@
 package hu.denes.bme.dipterv.data;
 
+import hu.denes.bme.dipterv.data.extractor.ResultSetExtractor;
 import hu.denes.bme.dipterv.data.sql.Query;
 import hu.denes.bme.dipterv.metadata.DimensionDef;
 import hu.denes.bme.dipterv.metadata.KpiDef;
@@ -8,9 +9,7 @@ import hu.denes.bme.dipterv.metadata.datasource.MeasurementDataSource;
 import io.swagger.model.DataRequest;
 import io.swagger.model.DataResponse;
 import io.swagger.model.DataResponseHeader;
-import io.swagger.model.Datasource;
 import io.swagger.model.DimensionRequest;
-import io.swagger.model.Kpi;
 import io.swagger.model.KpiRequest;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -18,18 +17,27 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
+import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import hu.denes.bme.dipterv.data.extractor.ResultSetExtractor.*;
 
 @Service
 public class DataProvider {
     @Autowired
     private MetadataProvider metadataProvider;
 
+    Map<String, ResultSetExtractor> typeToExtractor = new HashMap<>();
+
     public DataResponse getData(final DataRequest request) {
+        List<ResultSetExtractor> extractors = new ArrayList<>();
+        extractors.add(new StringResultSetExtractor());
+
         MeasurementDataSource ds = metadataProvider.getMeasurementDataSourceByName(request.getDatasource());
         Query q = createQuery(ds);
         List<KpiDef> requestdKpis = new ArrayList<>();
@@ -38,18 +46,20 @@ public class DataProvider {
         DataResponse response = new DataResponse();
         List<DataResponseHeader> header = new ArrayList<>();
 
-        for(KpiRequest kpi : request.getKpis()) {
-            KpiDef kDef = ds.getKpiFor(kpi.getName(), kpi.getOfferedMetric());
-            q.addKpi(kDef, kpi.getOfferedMetric());
-            header.add(new DataResponseHeader().kpi(kpi.getName()).offeredMetric(kpi.getOfferedMetric()));
-            requestdKpis.add(kDef);
-        }
-
         for(DimensionRequest dr : request.getDimensions()) {
             DimensionDef dd = ds.getDimensionFor(dr.getName());
             q.addDimension(dd);
             header.add(new DataResponseHeader().dimension(dr.getName()));
             requestdDimensions.add(dd);
+            extractors.add(typeToExtractor.get(dd.getDatatype()));
+        }
+
+        for(KpiRequest kpi : request.getKpis()) {
+            KpiDef kDef = ds.getKpiFor(kpi.getName(), kpi.getOfferedMetric());
+            q.addKpi(kDef, kpi.getOfferedMetric());
+            header.add(new DataResponseHeader().kpi(kpi.getName()).offeredMetric(kpi.getOfferedMetric()));
+            requestdKpis.add(kDef);
+            extractors.add(typeToExtractor.get("DOUBLE"));
         }
 
         response.setHeader(header);
@@ -69,11 +79,11 @@ public class DataProvider {
             String queryString = q.toString();
             System.out.println("Running query: [" + queryString + "]");
             ResultSet rs = statement.executeQuery(queryString);
-            List<List<String>> mx = new ArrayList<>();
+            List<List<Object>> mx = new ArrayList<>();
             while (rs.next()) {
-                List<String> row = new ArrayList<>();
+                List<Object> row = new ArrayList<>();
                 for(int i = 1; i <= response.getHeader().size(); ++i) {
-                    row.add("" + rs.getFloat(i));
+                    row.add(extractors.get(i).extract(rs, i));
                 }
                 mx.add(row);
             }
@@ -99,5 +109,19 @@ public class DataProvider {
         q.setPassword(ds.getPassword());
         q.setMetadataProvider(metadataProvider);
         return q;
+    }
+
+    @PostConstruct
+    public void init() {
+        typeToExtractor.put("BOOLEAN", new BooleanResultSetExtractor());
+        typeToExtractor.put("FLOAT", new FloatResultSetExtractor());
+        typeToExtractor.put("DOUBLE", new DoubleResultSetExtractor());
+        typeToExtractor.put("STRING", new StringResultSetExtractor());
+        typeToExtractor.put("INT", new IntegerResultSetExtractor());
+        typeToExtractor.put("INT8", new IntegerResultSetExtractor());
+        typeToExtractor.put("INT16", new IntegerResultSetExtractor());
+        typeToExtractor.put("INT32", new IntegerResultSetExtractor());
+        typeToExtractor.put("LONG", new LongResultSetExtractor());
+        typeToExtractor.put("INT64", new LongResultSetExtractor());
     }
 }

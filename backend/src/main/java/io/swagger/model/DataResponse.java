@@ -21,7 +21,7 @@ public class DataResponse   {
   private List<DataResponseHeader> header = null;
 
   @JsonProperty("dataMatrix")
-  private List<List<String>> dataMatrix = null;
+  private List<List<Object>> dataMatrix = null;
 
   public DataResponse header(List<DataResponseHeader> header) {
     this.header = header;
@@ -52,14 +52,14 @@ public class DataResponse   {
     this.header = header;
   }
 
-  public DataResponse dataMatrix(List<List<String>> dataMatrix) {
+  public DataResponse dataMatrix(List<List<Object>> dataMatrix) {
     this.dataMatrix = dataMatrix;
     return this;
   }
 
-  public DataResponse addDataMatrixItem(List<String> dataMatrixItem) {
+  public DataResponse addDataMatrixItem(List<Object> dataMatrixItem) {
     if (this.dataMatrix == null) {
-      this.dataMatrix = new ArrayList<List<String>>();
+      this.dataMatrix = new ArrayList<List<Object>>();
     }
     this.dataMatrix.add(dataMatrixItem);
     return this;
@@ -73,11 +73,11 @@ public class DataResponse   {
 
   @Valid
 
-  public List<List<String>> getDataMatrix() {
+  public List<List<Object>> getDataMatrix() {
     return dataMatrix;
   }
 
-  public void setDataMatrix(List<List<String>> dataMatrix) {
+  public void setDataMatrix(List<List<Object>> dataMatrix) {
     this.dataMatrix = dataMatrix;
   }
 

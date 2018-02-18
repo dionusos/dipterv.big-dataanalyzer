@@ -6,6 +6,9 @@
         <table name="weather" resolution="1"/>
         <kpi name="temperature" metric="min"/>
         <kpi name="temperature" metric="max"/>
+        <kpi name="precipitation" metric="sum"/>
+        <kpi name="snowfall" metric="sum"/>
+        <kpi name="snowdepth" metric="sum"/>
         <dimension name="date"/>
         <dimension name="fog"/>
         <dimension name="fogheavy"/>

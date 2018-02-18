@@ -4,6 +4,5 @@ jdk:
 cache:
   directories:
   - $HOME/.m2
-sudo: required
 script:
   - gradle clean build

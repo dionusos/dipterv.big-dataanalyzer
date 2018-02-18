@@ -59,7 +59,7 @@
         <friendlyName>Snowdepth</friendlyName>
         <offeredMetric>
             <name>sum</name>
-            <calculation>sum(dnowdepth)</calculation>
+            <calculation>sum(snowdepth)</calculation>
             <friendlyName></friendlyName>
             <description></description>
         </offeredMetric>

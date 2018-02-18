@@ -7,9 +7,13 @@
 			.measurements { overflow: scroll; white-space: nowrap; }
 			.frame { border:1px solid purple; }
             #addNewMeasurement { height: 300px; width: 300px; display: block;}
+            #kpisSelector { size: 8cm; }
+            #dimensionsSelector { size: 8cm; }
 		</style>
 		<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
+		var dataStoreToKpis = {};
+		var dataStoreToDimensions = {};
         google.charts.load('current', {'packages':['corechart']});
 
         document.addEventListener("DOMContentLoaded", function (ev) {
@@ -36,32 +40,88 @@
             var selectBox = document.getElementById("datasourceSelector");
             var selectedValue = selectBox.options[selectBox.selectedIndex].value;
 
+            if(selectedValue in dataStoreToKpis) {
+                updateKpiSelector(selectedValue);
+                updateDimensionSelector(selectedValue);
+                return;
+			}
+
+            var xmlHttp = new XMLHttpRequest();
+            xmlHttp.onreadystatechange = function() {
+                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+                    dataStoreToKpis[selectedValue] = JSON.parse(xmlHttp.responseText);
+                    updateKpiSelector(selectedValue);
+                }
+            }
+            xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/kpi/list", true );
+            xmlHttp.send( null );
+
+            var xmlHttpD = new XMLHttpRequest();
+            xmlHttpD.onreadystatechange = function() {
+                if (xmlHttpD.readyState == 4 && xmlHttpD.status == 200) {
+                    dataStoreToKpis[selectedValue] = JSON.parse(xmlHttpD.responseText);
+                    dataStoreToDimensions[selectedValue] = JSON.parse(xmlHttpD.responseText);
+                    updateDimensionSelector(selectedValue);
+                }
+            }
+            xmlHttpD.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/dimension/list", true );
+            xmlHttpD.send( null );
+            return xmlHttp.responseText;
+        }
+
+        function updateKpiSelector(datasource) {
             var myNode = document.getElementById("kpisSelector");
             while (myNode.firstChild) {
                 myNode.removeChild(myNode.firstChild);
             }
-            var xmlHttp = new XMLHttpRequest();
-            xmlHttp.onreadystatechange = function() {
-                if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                    var kpis = JSON.parse(xmlHttp.responseText);
-                    for (var i in kpis) {
-                        var kpi = kpis[i];
-                        var opt = document.createElement("option");
-                        opt.value = kpi.name;
-                        opt.text = kpi.displayName;
-                        document.getElementById("kpisSelector").appendChild(opt);
-                    }
-                }
 
+            for (var i in dataStoreToKpis[datasource]) {
+                var kpi = dataStoreToKpis[datasource][i];
+                var opt = document.createElement("option");
+                opt.value = kpi.name + "###" + kpi.offeredMetric;
+                opt.text = kpi.displayName;
+                document.getElementById("kpisSelector").appendChild(opt);
             }
-            xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/kpi/list", true );
-            xmlHttp.send( null );
-            return xmlHttp.responseText;
+		}
+
+        function updateDimensionSelector(datasource) {
+            var myNode = document.getElementById("dimensionsSelector");
+            while (myNode.firstChild) {
+                myNode.removeChild(myNode.firstChild);
+            }
+
+            for (var i in dataStoreToDimensions[datasource]) {
+                var dimension = dataStoreToDimensions[datasource][i];
+                var opt = document.createElement("option");
+                opt.value = dimension.name;
+                opt.text = dimension.displayName;
+                document.getElementById("dimensionsSelector").appendChild(opt);
+            }
         }
 
         function addNewMeasurement() {
             var selectBox = document.getElementById("datasourceSelector");
             var selectedDatasource = selectBox.options[selectBox.selectedIndex].value;
+
+            var selectedKpis = getSelectValues(document.getElementById("kpisSelector"));
+            var selectedDimensions = getSelectValues(document.getElementById("dimensionsSelector"));
+
+            var kpisToQuery = [];
+            var dimensionsToQuery = [];
+            for(var i in selectedKpis) {
+                var k = selectedKpis[i].split("###");
+                var k2 = {};
+                k2.name = k[0];
+                k2.offeredMetric = k[1];
+                kpisToQuery.push(k2);
+            }
+
+            for(var i in selectedDimensions) {
+                var d = selectedDimensions[i];
+                var d2 = {};
+                d2.name = d;
+                dimensionsToQuery.push(d2);
+            }
 
             var xmlHttp = new XMLHttpRequest();
             xmlHttp.onreadystatechange = function() {
@@ -69,19 +129,23 @@
                     var dataResponse = JSON.parse(xmlHttp.responseText);
                     var header = []
 
-                    var dimensionIndex = 0;
+                    var dimensionIndexes = [];
                     for (var i in dataResponse.header) {
                         var h = dataResponse.header[i]
                         if (h.kpi === null) {
-                            dimensionIndex = i;
-                            break;
+                            dimensionIndexes.push(i);
                         }
                     }
 
-                    header.push(dataResponse.header[dimensionIndex].dimension);
+                    var dimHead = [];
+                    var x = dataResponse.header.slice(0,dimensionIndexes.length);
+                    for(var i in x) {
+                        dimHead.push(x[i].dimension);
+                    }
+                    header.push(dimHead.join(','));
                     for (var i in dataResponse.header) {
                         var h = dataResponse.header[i]
-                        if (i != dimensionIndex) {
+                        if (!dimensionIndexes.includes(i)) {
                             header.push(h.kpi);
                         }
                     }
@@ -90,9 +154,9 @@
                     for (var i in dataResponse.dataMatrix) {
                         var row = dataResponse.dataMatrix[i]
                         var dataRow = []
-                        dataRow.push(row[dimensionIndex])
+                        dataRow.push(row.slice(0,dimensionIndexes.length).join(','))
                         for (var j in row) {
-                            if (j != dimensionIndex) {
+                            if (!dimensionIndexes.includes(j)) {
                                 var val = parseFloat(row[j]);
                                 if(val == parseInt(row[j])) {
                                     val = parseInt(row[j]);
@@ -109,9 +173,10 @@
             }
             xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
             xmlHttp.setRequestHeader("Content-type", "application/json");
-            var params = {"datasource": selectedDatasource,
-                "kpis": [{"name": "temperature", "offeredMetric": "min"}],
-                "dimensions": [{"name": "thunder"}]};
+            var params = {"datasource": "example1",
+                "kpis": kpisToQuery,
+                "dimensions": dimensionsToQuery
+            };
             xmlHttp.send( JSON.stringify(params));
             return xmlHttp.responseText;
         }
@@ -128,8 +193,27 @@
                 title: 'My Daily Activities'
             };
 
-            var chart = new google.visualization.ColumnChart(document.getElementById('piechart'));
+            var random = Math.floor(Math.random() * 1000000);
+            var div = document.createElement("div");
+            div.id = random;
+            document.getElementById('measurement1').appendChild(div);
+            var chart = new google.visualization.ColumnChart(document.getElementById(random));
             chart.draw(data, options);
+        }
+
+        function getSelectValues(select) {
+            var result = [];
+            var options = select && select.options;
+            var opt;
+
+            for (var i=0, iLen=options.length; i<iLen; i++) {
+                opt = options[i];
+
+                if (opt.selected) {
+                    result.push(opt.value || opt.text);
+                }
+            }
+            return result;
         }
 
 	</script>
@@ -142,7 +226,6 @@
 					<div class="measurementTitle"><h2>Measurement 1</h2></div>
 					<div class="breakdown" id="piechart">
 					</div>
-					<div class="measurementFooterButtons"><button id="newBreakdown" onclick="addNewBreakdown()">Button</button></div>
 				</div>
 				<div id="addNewMeasurement">
 					<h2>Add new measurement</h2>
@@ -151,6 +234,8 @@
 					<br>
 					<select id="kpisSelector" multiple>
 					</select>
+                    <select id="dimensionsSelector" multiple>
+                    </select>
 					<button id="newMeasurementButton" onclick="addNewMeasurement()">Add new</button>
 				</div>
 			</div>

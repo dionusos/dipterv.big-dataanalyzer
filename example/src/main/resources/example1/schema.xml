@@ -7,5 +7,22 @@
         <kpi name="temperature" metric="min"/>
         <kpi name="temperature" metric="max"/>
         <dimension name="date"/>
+        <dimension name="fog"/>
+        <dimension name="fogheavy"/>
+        <dimension name="mist"/>
+        <dimension name="rain"/>
+        <dimension name="fogground"/>
+        <dimension name="ice"/>
+        <dimension name="glaze"/>
+        <dimension name="drizzle"/>
+        <dimension name="snow"/>
+        <dimension name="freezingrain"/>
+        <dimension name="smokehaze"/>
+        <dimension name="thunder"/>
+        <dimension name="highwind"/>
+        <dimension name="hail"/>
+        <dimension name="blowingsnow"/>
+        <dimension name="dust"/>
+        <dimension name="freezingfog"/>
     </schema>
 </schemas>

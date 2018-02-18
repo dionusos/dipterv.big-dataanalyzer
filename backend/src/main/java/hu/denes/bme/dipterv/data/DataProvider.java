@@ -32,6 +32,8 @@ public class DataProvider {
     public DataResponse getData(final DataRequest request) {
         MeasurementDataSource ds = metadataProvider.getMeasurementDataSourceByName(request.getDatasource());
         Query q = createQuery(ds);
+        List<KpiDef> requestdKpis = new ArrayList<>();
+        List<DimensionDef> requestdDimensions = new ArrayList<>();
 
         DataResponse response = new DataResponse();
         List<DataResponseHeader> header = new ArrayList<>();
@@ -40,17 +42,19 @@ public class DataProvider {
             KpiDef kDef = ds.getKpiFor(kpi.getName(), kpi.getOfferedMetric());
             q.addKpi(kDef, kpi.getOfferedMetric());
             header.add(new DataResponseHeader().kpi(kpi.getName()).offeredMetric(kpi.getOfferedMetric()));
+            requestdKpis.add(kDef);
         }
 
         for(DimensionRequest dr : request.getDimensions()) {
             DimensionDef dd = ds.getDimensionFor(dr.getName());
             q.addDimension(dd);
             header.add(new DataResponseHeader().dimension(dr.getName()));
+            requestdDimensions.add(dd);
         }
 
         response.setHeader(header);
 
-        q.setSchema(ds.getSchemas().getSchema().get(0).getName());
+        q.setSchema(ds.getShemasContaining(requestdKpis, requestdDimensions).get(0).getName());
         q.setTable(ds.getSchemas().getSchema().get(0).getTable().get(0).getName());
 
         Connection conn = null;

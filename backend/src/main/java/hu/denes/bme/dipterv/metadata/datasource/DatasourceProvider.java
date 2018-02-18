@@ -25,7 +25,11 @@ public class DatasourceProvider {
     @PostConstruct
     public void init() {
         System.err.println("initializing FDSP.....");
-        String basePath = "example/src/main/resources";
+        String basePath;
+        basePath = System.getProperty("datasources.path");
+        if(basePath == null){
+            basePath =  "example/src/main/resources";
+        }
         for (final File f : new File(basePath).listFiles()) {
             if (f.isDirectory()) {
                 loadDatasource(f);
@@ -67,6 +71,7 @@ public class DatasourceProvider {
             e.printStackTrace();
             return;
         }
+        measurementDataSource.optimize();
         datasources.add(measurementDataSource);
         nameToDatasource.put(measurementDataSource.getDatasource().getName(), measurementDataSource);
     }

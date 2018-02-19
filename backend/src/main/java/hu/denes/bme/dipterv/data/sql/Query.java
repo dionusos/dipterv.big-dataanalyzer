@@ -96,13 +96,15 @@ public class Query {
             sb.append(where.toString());
         }
 
-        sb.append(" GROUP BY ");
-        Iterator<String> itgb = groupBys.iterator();
-        while (itgb.hasNext()){
-            String s = itgb.next();
-            sb.append(s);
-            if(itgb.hasNext()){
-                sb.append(", ");
+        if(groupBys.size() > 0) {
+            sb.append(" GROUP BY ");
+            Iterator<String> itgb = groupBys.iterator();
+            while (itgb.hasNext()) {
+                String s = itgb.next();
+                sb.append(s);
+                if (itgb.hasNext()) {
+                    sb.append(", ");
+                }
             }
         }
 

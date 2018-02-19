@@ -55,20 +55,24 @@ public class DataProvider {
         DataResponse response = new DataResponse();
         List<DataResponseHeader> header = new ArrayList<>();
 
-        for(DimensionRequest dr : request.getDimensions()) {
-            DimensionDef dd = ds.getDimensionFor(dr.getName());
-            q.addDimension(dd);
-            header.add(new DataResponseHeader().dimension(dr.getName()));
-            requestdDimensions.add(dd);
-            extractors.add(typeToExtractor.get(dd.getDatatype()));
+        if(request.getDimensions() != null) {
+            for (DimensionRequest dr : request.getDimensions()) {
+                DimensionDef dd = ds.getDimensionFor(dr.getName());
+                q.addDimension(dd);
+                header.add(new DataResponseHeader().dimension(dr.getName()));
+                requestdDimensions.add(dd);
+                extractors.add(typeToExtractor.get(dd.getDatatype()));
+            }
         }
 
-        for(KpiRequest kpi : request.getKpis()) {
-            KpiDef kDef = ds.getKpiFor(kpi.getName(), kpi.getOfferedMetric());
-            q.addKpi(kDef, kpi.getOfferedMetric());
-            header.add(new DataResponseHeader().kpi(kpi.getName()).offeredMetric(kpi.getOfferedMetric()));
-            requestdKpis.add(kDef);
-            extractors.add(typeToExtractor.get("DOUBLE"));
+        if(request.getKpis() != null) {
+            for (KpiRequest kpi : request.getKpis()) {
+                KpiDef kDef = ds.getKpiFor(kpi.getName(), kpi.getOfferedMetric());
+                q.addKpi(kDef, kpi.getOfferedMetric());
+                header.add(new DataResponseHeader().kpi(kpi.getName()).offeredMetric(kpi.getOfferedMetric()));
+                requestdKpis.add(kDef);
+                extractors.add(typeToExtractor.get("DOUBLE"));
+            }
         }
 
         Expression lastExpression = new Expression("true");

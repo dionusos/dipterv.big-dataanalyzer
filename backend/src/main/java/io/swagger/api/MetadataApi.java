@@ -12,6 +12,7 @@ import io.swagger.model.KpiList;
 
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -27,6 +28,7 @@ import javax.validation.Valid;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-13T21:19:23.429Z")
 
 @Api(value = "metadata", description = "the metadata API")
+@CrossOrigin(origins = "*")
 public interface MetadataApi {
 
     @ApiOperation(value = "", notes = "", response = DimensionList.class, tags={ "Metadata", })

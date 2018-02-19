@@ -10,6 +10,7 @@ import io.swagger.model.DataResponse;
 
 import io.swagger.annotations.*;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -25,6 +26,7 @@ import javax.validation.Valid;
 @javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-13T21:19:23.429Z")
 
 @Api(value = "data", description = "the data API")
+@CrossOrigin(origins = "*")
 public interface DataApi {
 
     @ApiOperation(value = "", notes = "", response = DataResponse.class, tags={ "Data", })

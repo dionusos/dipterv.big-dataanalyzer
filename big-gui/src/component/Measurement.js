@@ -2,6 +2,7 @@ import React from 'react';
 import * as appstate from '../appstate.js';
 import NewMeasurement from "./NewMeasurement";
 import Drilldown from "./Drilldown";
+import './Measurement.css'
 
 class Measurement extends React.Component {
 
@@ -10,7 +11,7 @@ class Measurement extends React.Component {
     }
     render() {
         return (
-            <div>
+            <div id="measurement">
                 <h2>Measurement id is {appstate.measurementById(this.props.id).id}</h2>
                 {
                     appstate.measurementById(this.props.id).drilldowns.map((drilldown) => (

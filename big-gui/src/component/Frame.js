@@ -2,6 +2,7 @@ import React from 'react';
 import * as appstate from '../appstate.js';
 import NewMeasurement from "./NewMeasurement";
 import Measurement from "./Measurement";
+import './Frame.css'
 
 class Frame extends React.Component {
     constructor(props){
@@ -30,8 +31,8 @@ class Frame extends React.Component {
         return (
             <div>
                 <h1>BIG data-analyzer</h1>
-                <div className="frame">
-                    <div className="measurements">
+                <div id="frame">
+                    <div id="measurements">
                         {
                             appstate.measurements.map((measurement) => (
                             <Measurement id={measurement.id}/>

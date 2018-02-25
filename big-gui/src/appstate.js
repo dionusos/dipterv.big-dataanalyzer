@@ -331,19 +331,27 @@ export function datasourceByMeasurement(measurementId) {
 
 export function newDrilldown(measurementId) {
     var select = document.getElementsByClassName("drilldownDimensionsSelector" + measurementId)[0];
-    if(select === undefined) {
+    if (select === undefined) {
         return;
     }
     var measurement = measurementById(measurementId);
 
     var drilldown = createDrilldown(measurement, getSelectValues(select));
     var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + measurementId)[0];
-    drilldown.filters.push(
-        {"dimension": fixedDimensionAndValue.innerHTML.split("=")[0],
-            "values":[fixedDimensionAndValue.innerHTML.split("=")[1]],
-            "isNegative": "false"
-        }
+    var split = fixedDimensionAndValue.innerHTML.split("=");
+    var ds = split[0].split(",");
+    var vs = split[1].split(",");
+    for (var i in ds) {
+        var dim = ds[i];
+        var valu = vs[i];
+        drilldown.filters.push(
+            {
+                "dimension": dim,
+                "values": [valu],
+                "isNegative": "false"
+            }
         );
+    }
 
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {

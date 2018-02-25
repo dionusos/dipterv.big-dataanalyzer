@@ -12,13 +12,15 @@ public class Query {
     private String url;
     private String user;
     private String password;
-    private List<Select> selects = new ArrayList<>();
+    protected List<Select> selects = new ArrayList<>();
+    private List<OrderBy> orderBys = new ArrayList<>();
     private List<String> groupBys = new ArrayList<>();
     private String schema;
     private String table;
+    protected Integer limit;
 
     private MetadataProvider metadataProvider;
-    private Expression where;
+    protected Expression where;
     private Expression having;
 
     public void addKpi(KpiDef kDef, String offeredMetric){
@@ -78,13 +80,15 @@ public class Query {
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("SELECT ");
-        Iterator<Select> it = selects.iterator();
-        while (it.hasNext()){
-            Select s = it.next();
-            sb.append(s.getCalculation()).append(" as ").append(s.getAlias());
-            if(it.hasNext()){
-                sb.append(", ");
+        {
+            sb.append("SELECT ");
+            Iterator<Select> it = selects.iterator();
+            while (it.hasNext()) {
+                Select s = it.next();
+                sb.append(s);
+                if (it.hasNext()) {
+                    sb.append(", ");
+                }
             }
         }
 
@@ -119,6 +123,18 @@ public class Query {
             sb.append(having.toString());
         }
 
+        if(!orderBys.isEmpty()) {
+            sb.append(" ORDER BY ");
+            Iterator<OrderBy> it = orderBys.iterator();
+            while (it.hasNext()){
+                OrderBy s = it.next();
+                sb.append(s.getCalculation()).append(" ").append(s.getDirection());
+                if(it.hasNext()){
+                    sb.append(", ");
+                }
+            }
+        }
+
         return sb.toString();
     }
 
@@ -136,5 +152,9 @@ public class Query {
 
     public void setHaving(And having) {
         this.having = having;
+    }
+
+    public void setLimit(Integer limit) {
+        this.limit = limit;
     }
 }

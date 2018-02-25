@@ -16,4 +16,13 @@ public class Select {
     public String getAlias() {
         return alias;
     }
+
+    @Override
+    public String toString() {
+        if(alias == null) {
+            return calculation;
+        } else {
+            return calculation + " as " + alias;
+        }
+    }
 }

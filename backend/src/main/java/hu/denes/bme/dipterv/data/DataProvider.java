@@ -120,7 +120,7 @@ public class DataProvider {
                             for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
                                 And a = new And();
                                 if(interval.getLower() != null) {
-                                    a.add(new LessOrEquals().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension())));
+                                    a.add(new LessOrEquals(new Expression(interval.getLower()), new Expression(filterRequest.getDimension())));
                                 }
                                 if(interval.getUpper() != null) {
                                     a.add(new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper())));
@@ -170,7 +170,7 @@ public class DataProvider {
                             for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
                                 And a = new And();
                                 if(interval.getLower() != null) {
-                                    a.add(new LessOrEquals().left(new Expression(interval.getLower())).right(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))));
+                                    a.add(new LessOrEquals(new Expression(interval.getLower()), new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))));
                                 }
                                 if(interval.getUpper() != null) {
                                     a.add(new LessThan().left(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))).right(new Expression(interval.getUpper())));

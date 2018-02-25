@@ -16,7 +16,7 @@ dependencies {
 task generateFromXsd(type: Exec) {
     delete("src/main/java")
     mkdir("src/main/java")
-    commandLine 'xjc', '-d', 'src/main/java', '-p', 'hu.denes.bme.dipterv.metadata', 'src/main/resources/*.xsd'
+    commandLine 'xjc', '-d', 'src/main/java', '-p', 'hu.denes.bme.dipterv.metadata', 'src/main/resources/schema.xsd', 'src/main/resources/datasource.xsd', 'src/main/resources/metadata.xsd'
 }
 
 compileJava.dependsOn generateFromXsd

@@ -15,7 +15,7 @@ class NewMeasurement extends React.Component {
                 <p>Select kpis</p>
                 <select id="kpisSelector" multiple>
                 </select>
-                <select id="dimensionsSelector" multiple>
+                <select className="dimensionsSelector" multiple>
                 </select>
                 <p>Select date</p>
                 <input type="date" name="starDate"/>

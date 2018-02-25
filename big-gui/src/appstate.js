@@ -37,7 +37,7 @@ export function datasourceSelected() {
 
     if(selectedValue in dataStoreToKpis) {
         updateKpiSelector(selectedValue);
-        updateDimensionSelector(selectedValue);
+        updateDimensionSelector(selectedValue, "dimensionsSelector");
         return;
     }
 
@@ -55,7 +55,7 @@ export function datasourceSelected() {
     xmlHttpD.onreadystatechange = function() {
         if (xmlHttpD.readyState == 4 && xmlHttpD.status == 200) {
             dataStoreToDimensions[selectedValue] = JSON.parse(xmlHttpD.responseText);
-            updateDimensionSelector(selectedValue);
+            updateDimensionSelector(selectedValue, "dimensionsSelector");
         }
     }
     xmlHttpD.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/dimension/list", true );
@@ -78,8 +78,8 @@ export function updateKpiSelector(datasource) {
     }
 }
 
-export function updateDimensionSelector(datasource) {
-    var myNode = document.getElementById("dimensionsSelector");
+export function updateDimensionSelector(datasource, dimensionSelectorClass) {
+    var myNode = document.getElementsByClassName(dimensionSelectorClass)[0];
     while (myNode.firstChild) {
         myNode.removeChild(myNode.firstChild);
     }
@@ -89,8 +89,35 @@ export function updateDimensionSelector(datasource) {
         var opt = document.createElement("option");
         opt.value = dimension.name;
         opt.text = dimension.displayName;
-        document.getElementById("dimensionsSelector").appendChild(opt);
+        document.getElementsByClassName(dimensionSelectorClass)[0].appendChild(opt);
     }
+}
+
+function createMeasurement(selectedDatasource, kpisToQuery, filters) {
+    var measurement = {};
+    measurement.id = nextID();
+    measurement.datasource = selectedDatasource;
+    measurement.kpis = kpisToQuery;
+    measurement.drilldowns = [];
+    if(filters === undefined) {
+        filters = [];
+    }
+    measurement.filters = filters;
+    measurements.push(measurement);
+    return measurement;
+}
+
+function createDrilldown(measurement, dimensionsToQuery, filters) {
+    var drilldown = {};
+    drilldown.id = nextID();
+    drilldown.dimensions = dimensionsToQuery;
+    measurement.drilldowns.push(drilldown);
+    if(filters === undefined) {
+        filters = [];
+    }
+    drilldown.filters = filters;
+
+    return drilldown;
 }
 
 export function addNewMeasurement() {
@@ -98,7 +125,7 @@ export function addNewMeasurement() {
     var selectedDatasource = selectBox.options[selectBox.selectedIndex].value;
 
     var selectedKpis = getSelectValues(document.getElementById("kpisSelector"));
-    var selectedDimensions = getSelectValues(document.getElementById("dimensionsSelector"));
+    var selectedDimensions = getSelectValues(document.getElementsByClassName("dimensionsSelector")[0]);
 
     var kpisToQuery = [];
     var dimensionsToQuery = [];
@@ -117,19 +144,9 @@ export function addNewMeasurement() {
         dimensionsToQuery.push(d2);
     }
 
-    var measurement = {};
-    measurement.id = nextID();
-    measurement.datasource = selectedDatasource;
-    measurement.kpis = kpisToQuery;
-    measurement.drilldowns = [];
+    var measurement = createMeasurement(selectedDatasource, kpisToQuery);
 
-    var drilldown = {};
-    drilldown.id = nextID();
-    drilldown.dimensions = dimensionsToQuery;
-
-    measurement.drilldowns.push(drilldown);
-
-    measurements.push(measurement);
+    var drilldown = createDrilldown(measurement, dimensionsToQuery);
 
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
@@ -187,15 +204,16 @@ export function addNewMeasurement() {
     }
     xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
     xmlHttp.setRequestHeader("Content-type", "application/json");
-    var params = {"datasource": "example1",
+    var params = {"datasource": selectedDatasource,
         "kpis": kpisToQuery,
-        "dimensions": dimensionsToQuery
+        "dimensions": dimensionsToQuery,
+        "filters": []
     };
     xmlHttp.send( JSON.stringify(params));
     return xmlHttp.responseText;
 }
 
-function getSelectValues(select) {
+export function getSelectValues(select) {
     var result = [];
     var options = select && select.options;
     var opt;
@@ -229,11 +247,44 @@ export function drawChart(mea, dr) {
     var data = GoogleCharts.api.visualization.arrayToDataTable(mix);
 
     var options = {
-        title: 'My Daily Activities'
+        title: header.slice(1).join(",") + " by " + header[0]
     };
 
     var chart = new GoogleCharts.api.visualization.ColumnChart(document.getElementById("drilldown_" + mea + "_" + dr));
+    drilldown.chart = chart;
     chart.draw(data, options);
+
+    GoogleCharts.api.visualization.events.addListener(chart, 'select', function() {
+        var selection = drilldownByMeasurementIdId(mea, dr).chart.getSelection();
+        if(selection === undefined || selection.length == 0) {
+
+            return;
+        }
+        var r = drilldownByMeasurementIdId(mea, dr).dataMatrix[selection[0].row];
+        // Get the modal
+        var modal = document.getElementById('myModal'+ mea);
+
+        // Get the <span> element that closes the modal
+       // var span = document.getElementsByClassName("close)[0];
+
+        modal.style.display = "block";
+
+        // When the user clicks on <span> (x), close the modal
+       /* span.onclick = function() {
+            modal.style.display = "none";
+        }*/
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
+        var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + mea)[0];
+        fixedDimensionAndValue.innerHTML = header[0] + "=" + r[0];
+
+    });
 }
 
 function nextID(){
@@ -272,4 +323,105 @@ export function drilldownByMeasurementIdId(meas, drill) {
         }
     }
     return null;
+}
+
+export function datasourceByMeasurement(measurementId) {
+    return measurementById(measurementId).datasource;
+}
+
+export function newDrilldown(measurementId) {
+    var select = document.getElementsByClassName("drilldownDimensionsSelector" + measurementId)[0];
+    if(select === undefined) {
+        return;
+    }
+    var measurement = measurementById(measurementId);
+
+    var drilldown = createDrilldown(measurement, getSelectValues(select));
+    var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + measurementId)[0];
+    drilldown.filters.push(
+        {"dimension": fixedDimensionAndValue.innerHTML.split("=")[0],
+            "values":[fixedDimensionAndValue.innerHTML.split("=")[1]],
+            "isNegative": "false"
+        }
+        );
+
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = function() {
+        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
+            var dataResponse = JSON.parse(xmlHttp.responseText);
+            var header = []
+
+            var dimensionIndexes = [];
+            for (var i in dataResponse.header) {
+                var h = dataResponse.header[i]
+                if (h.kpi === null) {
+                    dimensionIndexes.push(i);
+                }
+            }
+
+            var dimHead = [];
+            var x = dataResponse.header.slice(0,dimensionIndexes.length);
+            for(var i in x) {
+                dimHead.push(x[i].dimension);
+            }
+            header.push(dimHead.join(','));
+            for (var i in dataResponse.header) {
+                var h = dataResponse.header[i]
+                if (!dimensionIndexes.includes(i)) {
+                    header.push(h.kpi);
+                }
+            }
+
+            var dataMatrix = [];
+            for (var i in dataResponse.dataMatrix) {
+                var row = dataResponse.dataMatrix[i]
+                var dataRow = []
+                dataRow.push(row.slice(0,dimensionIndexes.length).join(','))
+                for (var j in row) {
+                    if (!dimensionIndexes.includes(j)) {
+                        var val = parseFloat(row[j]);
+                        if(val == parseInt(row[j])) {
+                            val = parseInt(row[j]);
+                        }
+
+                        dataRow.push(val)
+                    }
+                }
+                dataMatrix.push(dataRow);
+            }
+
+            drilldown.dataMatrix = dataMatrix;
+            drilldown.header = header;
+
+            for(var i in callbacks) {
+                callbacks[i].update();
+            }
+            drawChart(measurement.id, drilldown.id);
+        }
+    }
+    xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
+    xmlHttp.setRequestHeader("Content-type", "application/json");
+    var filters = [];
+    filters = filters.concat(measurement.filters);
+    for(var i in measurement.drilldowns) {
+        var d = measurement.drilldowns[i];
+        filters = filters.concat(d.filters);
+    }
+
+    var dimensionsToQuery = [];
+    for(var i in drilldown.dimensions) {
+        var d = drilldown.dimensions[i];
+        var d2 = {};
+        d2.name = d;
+        dimensionsToQuery.push(d2);
+    }
+
+    var params = {"datasource": measurement.datasource,
+        "kpis": measurement.kpis,
+        "dimensions": dimensionsToQuery,
+        "filters": filters
+    };
+    xmlHttp.send( JSON.stringify(params));
+
+    document.getElementById('myModal' + measurementId).style.display = "none";
 }

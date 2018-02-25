@@ -3,6 +3,8 @@ import * as appstate from '../appstate.js';
 import NewMeasurement from "./NewMeasurement";
 import Drilldown from "./Drilldown";
 import './Measurement.css'
+import DrilldownDimensionSelector from './DrilldownDimensionSelector.js'
+import {measurementById} from "../appstate";
 
 class Measurement extends React.Component {
 
@@ -18,8 +20,9 @@ class Measurement extends React.Component {
                         <Drilldown id={drilldown.id} measurement={this.props.id}/>
                     ))
                 }
-            </div>
 
+                <DrilldownDimensionSelector measurementId={this.props.id}/>
+            </div>
         );
     }
 }

@@ -11,7 +11,7 @@ class Drilldown extends React.Component {
         return (
             <div>
                 <h3>This is a drilldown, id={this.props.id}</h3>
-                <div id={"drilldown_" + this.props.measurement + "_" + this.props.id} class="drilldown">
+                <div id={"drilldown_" + this.props.measurement + "_" + this.props.id} className="drilldown">
 
                 </div>
             </div>

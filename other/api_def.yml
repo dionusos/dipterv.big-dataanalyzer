@@ -198,7 +198,12 @@ definitions:
       dimension:
         type: "string"
       kpi:
-        type: "string"
+        type: "object"
+        properties:
+          name:
+            type: "string"
+          offeredMetric:
+            type: "string"
       values:
         type: "array"
         items:

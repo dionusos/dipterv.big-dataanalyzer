@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import io.swagger.model.FilterRequestIntervals;
+import io.swagger.model.FilterRequestKpi;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
@@ -14,14 +15,14 @@ import javax.validation.constraints.*;
 /**
  * FilterRequest
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-25T13:39:26.575Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-25T20:34:36.366Z")
 
 public class FilterRequest   {
   @JsonProperty("dimension")
   private String dimension = null;
 
   @JsonProperty("kpi")
-  private String kpi = null;
+  private FilterRequestKpi kpi = null;
 
   @JsonProperty("values")
   private List<String> values = null;
@@ -52,7 +53,7 @@ public class FilterRequest   {
     this.dimension = dimension;
   }
 
-  public FilterRequest kpi(String kpi) {
+  public FilterRequest kpi(FilterRequestKpi kpi) {
     this.kpi = kpi;
     return this;
   }
@@ -63,12 +64,13 @@ public class FilterRequest   {
   **/
   @ApiModelProperty(value = "")
 
+  @Valid
 
-  public String getKpi() {
+  public FilterRequestKpi getKpi() {
     return kpi;
   }
 
-  public void setKpi(String kpi) {
+  public void setKpi(FilterRequestKpi kpi) {
     this.kpi = kpi;
   }
 

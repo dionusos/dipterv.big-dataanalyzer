@@ -21,6 +21,7 @@ import io.swagger.model.DataResponseHeader;
 import io.swagger.model.DimensionRequest;
 import io.swagger.model.FilterRequest;
 import io.swagger.model.FilterRequestIntervals;
+import io.swagger.model.FilterRequestKpi;
 import io.swagger.model.KpiRequest;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -79,6 +80,7 @@ public class DataProvider {
 
         if(request.getFilters() != null && !request.getFilters().isEmpty()) {
             And whereExpression = new And();
+            And havingExpression = new And();
             for (FilterRequest filterRequest : request.getFilters()) {
 
 
@@ -94,9 +96,13 @@ public class DataProvider {
                         if(filterRequest.getIntervals() != null && !filterRequest.getIntervals().isEmpty()) {
                             Or ors = new Or();
                             for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
-                                Expression left = new GreaterThan().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension()));
-                                Expression right = new GreaterOrEquals().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper()));
-                                And a = new And(left, right);
+                                And a = new And();
+                                if(interval.getLower() != null) {
+                                    a.add(new GreaterThan().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension())));
+                                }
+                                if(interval.getUpper() != null) {
+                                    a.add(new GreaterOrEquals().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper())));
+                                }
                                 ors.add(a);
                             }
                             whereExpression.add(ors);
@@ -112,12 +118,66 @@ public class DataProvider {
                         if(filterRequest.getIntervals() != null && !filterRequest.getIntervals().isEmpty()) {
                             Or ors = new Or();
                             for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
-                                Expression left = new LessOrEquals().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension()));
-                                Expression right = new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper()));
-                                And a = new And(left, right);
+                                And a = new And();
+                                if(interval.getLower() != null) {
+                                    a.add(new LessOrEquals().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension())));
+                                }
+                                if(interval.getUpper() != null) {
+                                    a.add(new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper())));
+                                }
                                 ors.add(a);
                             }
                             whereExpression.add(ors);
+                        }
+                    }
+                } else {
+                    if (filterRequest.getIsNegative()) {
+                        if (filterRequest.getValues() != null && !filterRequest.getValues().isEmpty()) {
+                            Or ors = new Or();
+                            for(String v : filterRequest.getValues()) {
+                                FilterRequestKpi k = filterRequest.getKpi();
+                                ors.add(new Not(new Eq().left(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))).right(new Expression(v))));
+                            }
+                            havingExpression.add(ors);
+                        }
+                        if(filterRequest.getIntervals() != null && !filterRequest.getIntervals().isEmpty()) {
+                            Or ors = new Or();
+                            FilterRequestKpi k = filterRequest.getKpi();
+                            for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
+                                And a = new And();
+                                if(interval.getLower() != null) {
+                                    a.add(new GreaterThan().left(new Expression(interval.getLower())).right(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))));
+                                }
+                                if(interval.getUpper() != null) {
+                                    a.add(new GreaterOrEquals().left(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))).right(new Expression(interval.getUpper())));
+                                }
+                                ors.add(a);
+                            }
+                            havingExpression.add(ors);
+                        }
+                    } else {
+                        if (filterRequest.getValues() != null) {
+                            Or ors = new Or();
+                            for (String v : filterRequest.getValues()) {
+                                FilterRequestKpi k = filterRequest.getKpi();
+                                ors.add(new Eq().left(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))).right(new Expression(v)));
+                            }
+                            havingExpression.add(ors);
+                        }
+                        if(filterRequest.getIntervals() != null && !filterRequest.getIntervals().isEmpty()) {
+                            Or ors = new Or();
+                            FilterRequestKpi k = filterRequest.getKpi();
+                            for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
+                                And a = new And();
+                                if(interval.getLower() != null) {
+                                    a.add(new LessOrEquals().left(new Expression(interval.getLower())).right(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))));
+                                }
+                                if(interval.getUpper() != null) {
+                                    a.add(new LessThan().left(new Expression(q.getCalculationFor(ds.getKpiFor(k.getName(), k.getOfferedMetric()), k.getOfferedMetric()))).right(new Expression(interval.getUpper())));
+                                }
+                                ors.add(a);
+                            }
+                            havingExpression.add(ors);
                         }
                     }
                 }
@@ -125,6 +185,7 @@ public class DataProvider {
 
             }
             q.setWhere(whereExpression);
+            q.setHaving(havingExpression);
         }
 
         response.setHeader(header);

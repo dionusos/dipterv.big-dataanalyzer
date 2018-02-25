@@ -19,8 +19,15 @@ public class Query {
 
     private MetadataProvider metadataProvider;
     private Expression where;
+    private Expression having;
 
     public void addKpi(KpiDef kDef, String offeredMetric){
+        String calculation = getCalculationFor(kDef, offeredMetric);
+        Select s = new Select(calculation, kDef.getName() + "_" + offeredMetric);
+        selects.add(s);
+    }
+
+    public String getCalculationFor(KpiDef kDef, String offeredMetric) {
         String calculation = "";
         for(OfferedMetric om : kDef.getOfferedMetric()){
             if(om.getName().equals(offeredMetric)){
@@ -28,8 +35,7 @@ public class Query {
                 break;
             }
         }
-        Select s = new Select(calculation, kDef.getName() + "_" + offeredMetric);
-        selects.add(s);
+        return calculation;
     }
 
     public void addDimension(DimensionDef dim) {
@@ -91,7 +97,7 @@ public class Query {
             sb.append(table);
         }
 
-        if(where != null) {
+        if(where != null && !where.toString().isEmpty()) {
             sb.append(" WHERE ");
             sb.append(where.toString());
         }
@@ -108,6 +114,11 @@ public class Query {
             }
         }
 
+        if(having != null && !having.toString().isEmpty()){
+            sb.append(" HAVING ");
+            sb.append(having.toString());
+        }
+
         return sb.toString();
     }
 
@@ -121,5 +132,9 @@ public class Query {
 
     public void setWhere(Expression where) {
         this.where = where;
+    }
+
+    public void setHaving(And having) {
+        this.having = having;
     }
 }

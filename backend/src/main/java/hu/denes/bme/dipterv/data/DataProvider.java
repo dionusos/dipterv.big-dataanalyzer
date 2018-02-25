@@ -9,6 +9,7 @@ import hu.denes.bme.dipterv.data.sql.GreaterThan;
 import hu.denes.bme.dipterv.data.sql.LessOrEquals;
 import hu.denes.bme.dipterv.data.sql.LessThan;
 import hu.denes.bme.dipterv.data.sql.Not;
+import hu.denes.bme.dipterv.data.sql.Or;
 import hu.denes.bme.dipterv.data.sql.Query;
 import hu.denes.bme.dipterv.metadata.DimensionDef;
 import hu.denes.bme.dipterv.metadata.KpiDef;
@@ -19,6 +20,7 @@ import io.swagger.model.DataResponse;
 import io.swagger.model.DataResponseHeader;
 import io.swagger.model.DimensionRequest;
 import io.swagger.model.FilterRequest;
+import io.swagger.model.FilterRequestIntervals;
 import io.swagger.model.KpiRequest;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -75,35 +77,54 @@ public class DataProvider {
             }
         }
 
-        Expression lastExpression = new Expression("true");
-        if(request.getFilters() != null) {
+        if(request.getFilters() != null && !request.getFilters().isEmpty()) {
+            And whereExpression = new And();
             for (FilterRequest filterRequest : request.getFilters()) {
-                And exp = new And();
-                exp.left(lastExpression);
+
+
                 if (filterRequest.getDimension() != null) {
                     if (filterRequest.getIsNegative()) {
-                        if (filterRequest.getValue() != null) {
-                            exp.right(new Not(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getValue()))));
-                        } else {
-                            Expression left = new GreaterThan().left(new Expression(filterRequest.getInterval().getLower())).right(new Expression(filterRequest.getDimension()));
-                            Expression right = new GreaterOrEquals().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getInterval().getUpper()));
-                            And a = new And(left, right);
-                            exp.right(a);
+                        if (filterRequest.getValues() != null && !filterRequest.getValues().isEmpty()) {
+                            Or ors = new Or();
+                            for(String v : filterRequest.getValues()) {
+                                ors.add(new Not(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(v))));
+                            }
+                            whereExpression.add(ors);
+                        }
+                        if(filterRequest.getIntervals() != null && !filterRequest.getIntervals().isEmpty()) {
+                            Or ors = new Or();
+                            for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
+                                Expression left = new GreaterThan().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension()));
+                                Expression right = new GreaterOrEquals().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper()));
+                                And a = new And(left, right);
+                                ors.add(a);
+                            }
+                            whereExpression.add(ors);
                         }
                     } else {
-                        if (filterRequest.getValue() != null) {
-                            exp.right(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getValue())));
-                        } else {
-                            Expression left = new LessOrEquals().left(new Expression(filterRequest.getInterval().getLower())).right(new Expression(filterRequest.getDimension()));
-                            Expression right = new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(filterRequest.getInterval().getUpper()));
-                            And a = new And(left, right);
-                            exp.right(a);
+                        if (filterRequest.getValues() != null) {
+                            Or ors = new Or();
+                            for (String v : filterRequest.getValues()) {
+                                ors.add(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(v)));
+                            }
+                            whereExpression.add(ors);
+                        }
+                        if(filterRequest.getIntervals() != null && !filterRequest.getIntervals().isEmpty()) {
+                            Or ors = new Or();
+                            for(FilterRequestIntervals interval : filterRequest.getIntervals()) {
+                                Expression left = new LessOrEquals().left(new Expression(interval.getLower())).right(new Expression(filterRequest.getDimension()));
+                                Expression right = new LessThan().left(new Expression(filterRequest.getDimension())).right(new Expression(interval.getUpper()));
+                                And a = new And(left, right);
+                                ors.add(a);
+                            }
+                            whereExpression.add(ors);
                         }
                     }
                 }
-                lastExpression = exp;
+
+
             }
-            q.setWhere(lastExpression);
+            q.setWhere(whereExpression);
         }
 
         response.setHeader(header);

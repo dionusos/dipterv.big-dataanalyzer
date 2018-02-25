@@ -5,22 +5,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
+import java.math.BigDecimal;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
- * FilterRequestInterval
+ * FilterRequestIntervals
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-13T21:19:23.429Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-25T13:39:26.575Z")
 
-public class FilterRequestInterval   {
+public class FilterRequestIntervals   {
   @JsonProperty("lower")
   private String lower = null;
 
   @JsonProperty("upper")
   private String upper = null;
 
-  public FilterRequestInterval lower(String lower) {
+  public FilterRequestIntervals lower(String lower) {
     this.lower = lower;
     return this;
   }
@@ -31,6 +32,7 @@ public class FilterRequestInterval   {
   **/
   @ApiModelProperty(value = "")
 
+  @Valid
 
   public String getLower() {
     return lower;
@@ -40,7 +42,7 @@ public class FilterRequestInterval   {
     this.lower = lower;
   }
 
-  public FilterRequestInterval upper(String upper) {
+  public FilterRequestIntervals upper(String upper) {
     this.upper = upper;
     return this;
   }
@@ -51,6 +53,7 @@ public class FilterRequestInterval   {
   **/
   @ApiModelProperty(value = "")
 
+  @Valid
 
   public String getUpper() {
     return upper;
@@ -69,9 +72,9 @@ public class FilterRequestInterval   {
     if (o == null || getClass() != o.getClass()) {
       return false;
     }
-    FilterRequestInterval filterRequestInterval = (FilterRequestInterval) o;
-    return Objects.equals(this.lower, filterRequestInterval.lower) &&
-        Objects.equals(this.upper, filterRequestInterval.upper);
+    FilterRequestIntervals filterRequestIntervals = (FilterRequestIntervals) o;
+    return Objects.equals(this.lower, filterRequestIntervals.lower) &&
+        Objects.equals(this.upper, filterRequestIntervals.upper);
   }
 
   @Override
@@ -82,10 +85,10 @@ public class FilterRequestInterval   {
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
-    sb.append("class FilterRequestInterval {\n");
+    sb.append("class FilterRequestIntervals {\n");
     
-    sb.append("    lower: ").append(toIndentedString(lower)).append("\n");
-    sb.append("    upper: ").append(toIndentedString(upper)).append("\n");
+    sb.append("    lower: ").append(lower).append("\n");
+    sb.append("    upper: ").append(upper).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -199,15 +199,19 @@ definitions:
         type: "string"
       kpi:
         type: "string"
-      value:
-        type: "string"
-      interval:
-        type: "object"
-        properties:
-          lower:
-            type: "string"
-          upper:
-            type: "string"
+      values:
+        type: "array"
+        items:
+          type: "string"
+      intervals:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            lower:
+              type: "string"
+            upper:
+              type: "string"
       isNegative:
         type: "boolean"
 

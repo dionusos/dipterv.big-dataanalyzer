@@ -1,12 +1,13 @@
 package hu.denes.bme.dipterv.data.sql;
 
-public class And extends TwoOperandExpression{
-    public And(Expression left, Expression right) {
-        super(left, right);
-    }
+public class And extends NOperandExpression{
 
     public And() {
-        super(null, null);
+
+    }
+
+    public And(Expression left, Expression right) {
+        super(left, right);
     }
 
     @Override

@@ -5,14 +5,16 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
-import io.swagger.model.FilterRequestInterval;
+import io.swagger.model.FilterRequestIntervals;
+import java.util.ArrayList;
+import java.util.List;
 import javax.validation.Valid;
 import javax.validation.constraints.*;
 
 /**
  * FilterRequest
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-13T21:19:23.429Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-25T13:39:26.575Z")
 
 public class FilterRequest   {
   @JsonProperty("dimension")
@@ -21,11 +23,11 @@ public class FilterRequest   {
   @JsonProperty("kpi")
   private String kpi = null;
 
-  @JsonProperty("value")
-  private String value = null;
+  @JsonProperty("values")
+  private List<String> values = null;
 
-  @JsonProperty("interval")
-  private FilterRequestInterval interval = null;
+  @JsonProperty("intervals")
+  private List<FilterRequestIntervals> intervals = null;
 
   @JsonProperty("isNegative")
   private Boolean isNegative = null;
@@ -70,45 +72,61 @@ public class FilterRequest   {
     this.kpi = kpi;
   }
 
-  public FilterRequest value(String value) {
-    this.value = value;
+  public FilterRequest values(List<String> values) {
+    this.values = values;
+    return this;
+  }
+
+  public FilterRequest addValuesItem(String valuesItem) {
+    if (this.values == null) {
+      this.values = new ArrayList<String>();
+    }
+    this.values.add(valuesItem);
     return this;
   }
 
    /**
-   * Get value
-   * @return value
+   * Get values
+   * @return values
   **/
   @ApiModelProperty(value = "")
 
 
-  public String getValue() {
-    return value;
+  public List<String> getValues() {
+    return values;
   }
 
-  public void setValue(String value) {
-    this.value = value;
+  public void setValues(List<String> values) {
+    this.values = values;
   }
 
-  public FilterRequest interval(FilterRequestInterval interval) {
-    this.interval = interval;
+  public FilterRequest intervals(List<FilterRequestIntervals> intervals) {
+    this.intervals = intervals;
+    return this;
+  }
+
+  public FilterRequest addIntervalsItem(FilterRequestIntervals intervalsItem) {
+    if (this.intervals == null) {
+      this.intervals = new ArrayList<FilterRequestIntervals>();
+    }
+    this.intervals.add(intervalsItem);
     return this;
   }
 
    /**
-   * Get interval
-   * @return interval
+   * Get intervals
+   * @return intervals
   **/
   @ApiModelProperty(value = "")
 
   @Valid
 
-  public FilterRequestInterval getInterval() {
-    return interval;
+  public List<FilterRequestIntervals> getIntervals() {
+    return intervals;
   }
 
-  public void setInterval(FilterRequestInterval interval) {
-    this.interval = interval;
+  public void setIntervals(List<FilterRequestIntervals> intervals) {
+    this.intervals = intervals;
   }
 
   public FilterRequest isNegative(Boolean isNegative) {
@@ -143,14 +161,14 @@ public class FilterRequest   {
     FilterRequest filterRequest = (FilterRequest) o;
     return Objects.equals(this.dimension, filterRequest.dimension) &&
         Objects.equals(this.kpi, filterRequest.kpi) &&
-        Objects.equals(this.value, filterRequest.value) &&
-        Objects.equals(this.interval, filterRequest.interval) &&
+        Objects.equals(this.values, filterRequest.values) &&
+        Objects.equals(this.intervals, filterRequest.intervals) &&
         Objects.equals(this.isNegative, filterRequest.isNegative);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dimension, kpi, value, interval, isNegative);
+    return Objects.hash(dimension, kpi, values, intervals, isNegative);
   }
 
   @Override
@@ -160,8 +178,8 @@ public class FilterRequest   {
     
     sb.append("    dimension: ").append(toIndentedString(dimension)).append("\n");
     sb.append("    kpi: ").append(toIndentedString(kpi)).append("\n");
-    sb.append("    value: ").append(toIndentedString(value)).append("\n");
-    sb.append("    interval: ").append(toIndentedString(interval)).append("\n");
+    sb.append("    values: ").append(toIndentedString(values)).append("\n");
+    sb.append("    intervals: ").append(toIndentedString(intervals)).append("\n");
     sb.append("    isNegative: ").append(toIndentedString(isNegative)).append("\n");
     sb.append("}");
     return sb.toString();

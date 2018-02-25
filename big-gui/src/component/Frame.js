@@ -38,8 +38,9 @@ class Frame extends React.Component {
                             <Measurement id={measurement.id}/>
                             ))
                         }
+                        <NewMeasurement/>
                     </div>
-                    <NewMeasurement/>
+
                 </div>
             </div>
 

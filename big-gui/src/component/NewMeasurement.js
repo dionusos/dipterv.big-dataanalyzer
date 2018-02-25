@@ -1,5 +1,6 @@
 import React from 'react';
 import * as appstate from '../appstate.js';
+import './NewMeasurement.css'
 
 class NewMeasurement extends React.Component {
     componentDidMount() {

@@ -9,6 +9,7 @@ import hu.denes.bme.dipterv.metadata.Metadata;
 import hu.denes.bme.dipterv.metadata.OfferedMetric;
 import hu.denes.bme.dipterv.metadata.Schema;
 import hu.denes.bme.dipterv.metadata.Schemas;
+import hu.denes.bme.dipterv.metadata.Table;
 import io.swagger.model.DimensionRequest;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,6 +26,9 @@ public class MeasurementDataSource {
 
     Map<Schema, Set<String>> schemaToStoredKpis = new HashMap<>();
     Map<Schema, Set<String>> schemaToStoredDimensions = new HashMap<>();
+    Map<String, Schema> nameToSchema = new HashMap<>();
+    Map<String, DimensionDef> dimensionByName = new HashMap<>();
+    Map<String, KpiDef> kpiByName = new HashMap<>();
 
     public MeasurementDataSource(){
 
@@ -113,6 +117,7 @@ public class MeasurementDataSource {
 
     public void optimize() {
         for(Schema s : getSchemas().getSchema()) {
+            nameToSchema.put(s.getName(), s);
             Set<String> storeKpiSet = new HashSet<>();
             Set<String> storeDimensionSet = new HashSet<>();
             for(Kpi k : s.getKpi()){
@@ -123,6 +128,79 @@ public class MeasurementDataSource {
                 storeDimensionSet.add(d.getName());
             }
             schemaToStoredDimensions.put(s, storeDimensionSet);
+        }
+        for(KpiDef k : metadata.getKpi()) {
+            kpiByName.put(k.getName(), k);
+        }
+        for(DimensionDef d : metadata.getDimension()) {
+            dimensionByName.put(d.getName(), d);
+        }
+        generateAggregatorSQL();
+    }
+
+    private static Map<String, String> abstr2Sql = new HashMap<>();
+    static {
+        abstr2Sql.put("INT", "INT");
+        abstr2Sql.put("IN8", "INT");
+        abstr2Sql.put("INT16", "INT");
+        abstr2Sql.put("INT32", "INT");
+        abstr2Sql.put("INT64", "INT");
+        abstr2Sql.put("LONG", "LONG");
+        abstr2Sql.put("DOUBLE", "DOUBLE");
+        abstr2Sql.put("FLOAT", "DOUBLE");
+        abstr2Sql.put("STRING", "VARCHAR");
+    }
+
+    public void generateAggregatorSQL() {
+        for(Schema s : getSchemas().getSchema()) {
+            generateCreateTable(s);
+            if(s.getSource() == null) {
+                continue;
+            }
+            Schema sourceSchema = nameToSchema.get(s.getSource());
+            if(sourceSchema == null) {
+                continue;
+            }
+
+            for(Table t : s.getTable()) {
+                StringBuilder sb = new StringBuilder("INSERT INTO ");
+                sb.append(s.getName()).append(".").append(t.getName());
+                sb.append(" SELECT ");
+                for(Dimension d : s.getDimension()) {
+                    sb.append(d.getName()).append(",");
+                }
+                for (Kpi k : s.getKpi()){
+                    sb.append("SUM(").append(k.getName()).append(")").append(",");
+                }
+                sb.append(" FROM ");
+                sb.append(s.getName()).append(".").append(t.getSource());
+                sb.append(" WHERE ");
+                sb.append(" GROUP BY ");
+                for(Dimension d : s.getDimension()) {
+                    sb.append(d.getName()).append(",");
+                }
+                System.out.println(sb.toString());
+            }
+
+
+        }
+    }
+
+    private void generateCreateTable(Schema s) {
+        StringBuilder sb = new StringBuilder("CREATE SCHEMA " + s.getName());
+        sb.append(";");
+        System.out.println(sb.toString());
+        for(Table t : s.getTable()) {
+            sb = new StringBuilder("CREATE TABLE ");
+            sb.append(s.getName()).append(".").append(t.getName()).append(" ( \n");
+            for(Dimension d : s.getDimension()) {
+                sb.append(d.getName()).append(" ").append(abstr2Sql.get(dimensionByName.get(d.getName()).getDatatype())).append(",\n");
+            }
+            for(Kpi k : s.getKpi()) {
+                sb.append(k.getName()).append(",\n");
+            }
+            sb.append(");");
+            System.out.println(sb.toString());
         }
     }
 }

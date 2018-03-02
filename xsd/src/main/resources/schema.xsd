@@ -14,11 +14,13 @@
             <xs:element type="Kpi" name="kpi" maxOccurs="unbounded" minOccurs="0"/>
         </xs:sequence>
         <xs:attribute type="xs:string" name="name"/>
+        <xs:attribute type="xs:string" name="source"/>
     </xs:complexType>
 
     <xs:complexType name="Table">
         <xs:attribute type="xs:string" name="name"/>
         <xs:attribute type="xs:integer" name="resolution"/>
+        <xs:attribute type="xs:string" name="source"/>
     </xs:complexType>
 
     <xs:complexType name="Kpi">

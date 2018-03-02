@@ -23,7 +23,6 @@ class DrilldownDimensionSelector extends React.Component {
             <div id={"myModal" + this.props.measurementId} className={"modal"}>
 
                 <div className="modal-content">
-                    <span className={"close"}>&times;</span>
                     <p>Select some dimensions</p>
                     <div className={"fixedDimensionAndValue" +  + this.props.measurementId}></div>
                     <select className={"drilldownDimensionsSelector" + this.props.measurementId} multiple>

@@ -1,5 +1,6 @@
 import {GoogleCharts} from 'google-charts';
 var ID = 0;
+var backend = "http://localhost:8080/big"
 
 GoogleCharts.load(drawChart);
 export var dataStoreToKpis = {};
@@ -23,7 +24,7 @@ export function loadDataSources() {
             }
         }
     }
-    xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasources", true ); // false for synchronous request
+    xmlHttp.open( "GET", backend + "/metadata/datasources", true ); // false for synchronous request
     xmlHttp.send( null );
     return xmlHttp.responseText;
 }
@@ -48,7 +49,7 @@ export function datasourceSelected() {
             updateKpiSelector(selectedValue);
         }
     }
-    xmlHttp.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/kpi/list", true );
+    xmlHttp.open( "GET", backend + "/metadata/datasource/" + selectedValue + "/kpi/list", true );
     xmlHttp.send( null );
 
     var xmlHttpD = new XMLHttpRequest();
@@ -58,7 +59,7 @@ export function datasourceSelected() {
             updateDimensionSelector(selectedValue, "dimensionsSelector");
         }
     }
-    xmlHttpD.open( "GET", "http://localhost:8080/big/metadata/datasource/" + selectedValue + "/dimension/list", true );
+    xmlHttpD.open( "GET", backend + "/metadata/datasource/" + selectedValue + "/dimension/list", true );
     xmlHttpD.send( null );
     return xmlHttp.responseText;
 }
@@ -202,7 +203,7 @@ export function addNewMeasurement() {
             drawChart(measurement.id, drilldown.id);
         }
     }
-    xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
+    xmlHttp.open( "POST", backend + "/data", true );
     xmlHttp.setRequestHeader("Content-type", "application/json");
     var params = {"datasource": selectedDatasource,
         "kpis": kpisToQuery,
@@ -407,7 +408,7 @@ export function newDrilldown(measurementId) {
             drawChart(measurement.id, drilldown.id);
         }
     }
-    xmlHttp.open( "POST", "http://localhost:8080/big/data", true );
+    xmlHttp.open( "POST", backend + "/data", true );
     xmlHttp.setRequestHeader("Content-type", "application/json");
     var filters = [];
     filters = filters.concat(measurement.filters);

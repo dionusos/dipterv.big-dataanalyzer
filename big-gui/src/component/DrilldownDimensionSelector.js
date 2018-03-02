@@ -24,7 +24,7 @@ class DrilldownDimensionSelector extends React.Component {
 
                 <div className="modal-content">
                     <p>Select some dimensions</p>
-                    <div className={"fixedDimensionAndValue" +  + this.props.measurementId}></div>
+                    <div className={"fixedDimensionAndValue" + this.props.measurementId}></div>
                     <select className={"drilldownDimensionsSelector" + this.props.measurementId} multiple>
                     </select>
                     <button onClick={this.letsDrilldown}>Let's Drilldown</button>

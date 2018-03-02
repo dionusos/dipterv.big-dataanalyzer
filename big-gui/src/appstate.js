@@ -156,9 +156,7 @@ export function addNewMeasurement() {
 
             fillDrilldownWithDataResponse(drilldown, dataResponse);
 
-            for(var i in callbacks) {
-                callbacks[i].update();
-            }
+            notify();
             drawChart(measurement.id, drilldown.id);
         }
     }
@@ -170,6 +168,7 @@ export function addNewMeasurement() {
         "filters": []
     };
     xmlHttp.send( JSON.stringify(params));
+    notify();
     return xmlHttp.responseText;
 }
 
@@ -320,9 +319,7 @@ export function newDrilldown(measurementId) {
 
             fillDrilldownWithDataResponse(drilldown, dataResponse);
 
-            for(var i in callbacks) {
-                callbacks[i].update();
-            }
+            notify();
             drawChart(measurement.id, drilldown.id);
         }
     }
@@ -396,4 +393,29 @@ function fillDrilldownWithDataResponse(drilldown, dataResponse) {
 
     drilldown.dataMatrix = dataMatrix;
     drilldown.header = header;
+}
+
+function notify() {
+    for (var i in callbacks) {
+        callbacks[i].update();
+    }
+}
+
+export function deleteDrilldownsFrom(drilldownId) {
+    for (var i in measurements) {
+        var m = measurements[i];
+        var deleteFrom = -1;
+        for(var j in m.drilldowns){
+            var d = m.drilldowns[j];
+            if(d.id === drilldownId) {
+                deleteFrom = j;
+                break;
+            }
+        }
+        if(deleteFrom != -1) {
+            m.drilldowns = m.drilldowns.slice(0, deleteFrom);
+            break;
+        }
+    }
+    notify();
 }

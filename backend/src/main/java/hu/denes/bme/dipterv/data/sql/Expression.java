@@ -7,6 +7,12 @@ public class Expression {
         this.expression = expression;
     }
 
+    public Expression(String expression, boolean quote){
+        if(quote) {
+            this.expression = "\"" + expression + "\"";
+        }
+    }
+
     public Expression(Integer expression){
         this.expression = "" + expression;
     }

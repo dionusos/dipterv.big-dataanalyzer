@@ -85,11 +85,12 @@ public class DataProvider {
 
 
                 if (filterRequest.getDimension() != null) {
+                    boolean shouldQuote = ds.getDimensionFor(filterRequest.getDimension()).getDatatype().equals("STRING");
                     if (filterRequest.getIsNegative()) {
                         if (filterRequest.getValues() != null && !filterRequest.getValues().isEmpty()) {
                             Or ors = new Or();
                             for(String v : filterRequest.getValues()) {
-                                ors.add(new Not(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(v))));
+                                ors.add(new Not(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(v, shouldQuote))));
                             }
                             whereExpression.add(ors);
                         }
@@ -111,7 +112,7 @@ public class DataProvider {
                         if (filterRequest.getValues() != null) {
                             Or ors = new Or();
                             for (String v : filterRequest.getValues()) {
-                                ors.add(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(v)));
+                                ors.add(new Eq().left(new Expression(filterRequest.getDimension())).right(new Expression(v, shouldQuote)));
                             }
                             whereExpression.add(ors);
                         }

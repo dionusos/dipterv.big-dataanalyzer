@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemas
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../xsd/src/main/resources/schema.xsd">
+    <schema name="carsharing">
+        <table name="flatted" resolution="1"/>
+        <kpi name="battery_level" metric="avg"/>
+        <kpi name="estimated_km" metric="avg"/>
+        <kpi name="estimated_km" metric="sum"/>
+        <kpi name="samples" metric="sum"/>
+        <dimension name="timestamp"/>
+        <dimension name="company"/>
+        <dimension name="address"/>
+        <dimension name="battery_state"/>
+        <dimension name="battery_state_desc"/>
+        <dimension name="color"/>
+        <dimension name="color_desc"/>
+        <dimension name="distance"/>
+        <dimension name="doors"/>
+        <dimension name="gps_lat"/>
+        <dimension name="gps_long"/>
+        <dimension name="make"/>
+        <dimension name="make_desc"/>
+        <dimension name="max_range"/>
+        <dimension name="model"/>
+        <dimension name="plate_number"/>
+        <dimension name="seats"/>
+        <dimension name="state"/>
+        <dimension name="state_desc"/>
+        <dimension name="variant"/>
+        <dimension name="vehicle_id"/>
+    </schema>
+</schemas>

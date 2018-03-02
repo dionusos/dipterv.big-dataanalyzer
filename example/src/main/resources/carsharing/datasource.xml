@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<datasource
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="../../../../../xsd/src/main/resources/datasource.xsd">
+    <name>carsharing</name>
+    <friendlyName>Car Sharing Budapest</friendlyName>
+    <url>jdbc:mysql://localhost:3306/carsharing</url>
+    <user>example</user>
+    <password>password</password>
+
+</datasource>

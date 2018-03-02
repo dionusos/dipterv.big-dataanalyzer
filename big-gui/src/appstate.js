@@ -153,49 +153,8 @@ export function addNewMeasurement() {
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             var dataResponse = JSON.parse(xmlHttp.responseText);
-            var header = []
 
-            var dimensionIndexes = [];
-            for (var i in dataResponse.header) {
-                var h = dataResponse.header[i]
-                if (h.kpi === null) {
-                    dimensionIndexes.push(i);
-                }
-            }
-
-            var dimHead = [];
-            var x = dataResponse.header.slice(0,dimensionIndexes.length);
-            for(var i in x) {
-                dimHead.push(x[i].dimension);
-            }
-            header.push(dimHead.join(','));
-            for (var i in dataResponse.header) {
-                var h = dataResponse.header[i]
-                if (!dimensionIndexes.includes(i)) {
-                    header.push(h.kpi);
-                }
-            }
-
-            var dataMatrix = [];
-            for (var i in dataResponse.dataMatrix) {
-                var row = dataResponse.dataMatrix[i]
-                var dataRow = []
-                dataRow.push(row.slice(0,dimensionIndexes.length).join(','))
-                for (var j in row) {
-                    if (!dimensionIndexes.includes(j)) {
-                        var val = parseFloat(row[j]);
-                        if(val == parseInt(row[j])) {
-                            val = parseInt(row[j]);
-                        }
-
-                        dataRow.push(val)
-                    }
-                }
-                dataMatrix.push(dataRow);
-            }
-
-            drilldown.dataMatrix = dataMatrix;
-            drilldown.header = header;
+            fillDrilldownWithDataResponse(drilldown, dataResponse);
 
             for(var i in callbacks) {
                 callbacks[i].update();
@@ -358,49 +317,8 @@ export function newDrilldown(measurementId) {
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
             var dataResponse = JSON.parse(xmlHttp.responseText);
-            var header = []
 
-            var dimensionIndexes = [];
-            for (var i in dataResponse.header) {
-                var h = dataResponse.header[i]
-                if (h.kpi === null) {
-                    dimensionIndexes.push(i);
-                }
-            }
-
-            var dimHead = [];
-            var x = dataResponse.header.slice(0,dimensionIndexes.length);
-            for(var i in x) {
-                dimHead.push(x[i].dimension);
-            }
-            header.push(dimHead.join(','));
-            for (var i in dataResponse.header) {
-                var h = dataResponse.header[i]
-                if (!dimensionIndexes.includes(i)) {
-                    header.push(h.kpi);
-                }
-            }
-
-            var dataMatrix = [];
-            for (var i in dataResponse.dataMatrix) {
-                var row = dataResponse.dataMatrix[i]
-                var dataRow = []
-                dataRow.push(row.slice(0,dimensionIndexes.length).join(','))
-                for (var j in row) {
-                    if (!dimensionIndexes.includes(j)) {
-                        var val = parseFloat(row[j]);
-                        if(val == parseInt(row[j])) {
-                            val = parseInt(row[j]);
-                        }
-
-                        dataRow.push(val)
-                    }
-                }
-                dataMatrix.push(dataRow);
-            }
-
-            drilldown.dataMatrix = dataMatrix;
-            drilldown.header = header;
+            fillDrilldownWithDataResponse(drilldown, dataResponse);
 
             for(var i in callbacks) {
                 callbacks[i].update();
@@ -433,4 +351,49 @@ export function newDrilldown(measurementId) {
     xmlHttp.send( JSON.stringify(params));
 
     document.getElementById('myModal' + measurementId).style.display = "none";
+}
+function fillDrilldownWithDataResponse(drilldown, dataResponse) {
+    var header = []
+
+    var dimensionIndexes = [];
+    for (var i in dataResponse.header) {
+        var h = dataResponse.header[i]
+        if (h.kpi === null) {
+            dimensionIndexes.push(i);
+        }
+    }
+
+    var dimHead = [];
+    var x = dataResponse.header.slice(0,dimensionIndexes.length);
+    for(var i in x) {
+        dimHead.push(x[i].dimension);
+    }
+    header.push(dimHead.join(','));
+    for (var i in dataResponse.header) {
+        var h = dataResponse.header[i]
+        if (!dimensionIndexes.includes(i)) {
+            header.push(h.kpi);
+        }
+    }
+
+    var dataMatrix = [];
+    for (var i in dataResponse.dataMatrix) {
+        var row = dataResponse.dataMatrix[i]
+        var dataRow = []
+        dataRow.push(row.slice(0,dimensionIndexes.length).join(','))
+        for (var j in row) {
+            if (!dimensionIndexes.includes(j)) {
+                var val = parseFloat(row[j]);
+                if(val == parseInt(row[j])) {
+                    val = parseInt(row[j]);
+                }
+
+                dataRow.push(val)
+            }
+        }
+        dataMatrix.push(dataRow);
+    }
+
+    drilldown.dataMatrix = dataMatrix;
+    drilldown.header = header;
 }

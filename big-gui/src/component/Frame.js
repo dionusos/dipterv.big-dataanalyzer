@@ -35,7 +35,7 @@ class Frame extends React.Component {
                     <div id="measurements">
                         {
                             appstate.measurements.map((measurement) => (
-                            <Measurement id={measurement.id}/>
+                            <Measurement key={measurement.id} id={measurement.id}/>
                             ))
                         }
                         <NewMeasurement/>

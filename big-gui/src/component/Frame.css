@@ -6,4 +6,6 @@
 #measurements {
     overflow: auto;
     white-space: nowrap;
+    display: inline-block;
+    overflow-y:hidden;
 }

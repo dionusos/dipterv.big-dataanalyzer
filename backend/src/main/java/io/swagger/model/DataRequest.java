@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiModelProperty;
 import io.swagger.model.DimensionRequest;
 import io.swagger.model.FilterRequest;
 import io.swagger.model.KpiRequest;
+import io.swagger.model.OrderRequest;
 import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
@@ -16,7 +17,7 @@ import javax.validation.constraints.*;
 /**
  * DataRequest
  */
-@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-02-16T19:53:36.064Z")
+@javax.annotation.Generated(value = "io.swagger.codegen.languages.SpringCodegen", date = "2018-03-06T19:13:26.963Z")
 
 public class DataRequest   {
   @JsonProperty("datasource")
@@ -30,6 +31,12 @@ public class DataRequest   {
 
   @JsonProperty("filters")
   private List<FilterRequest> filters = null;
+
+  @JsonProperty("orders")
+  private List<OrderRequest> orders = null;
+
+  @JsonProperty("limit")
+  private Integer limit = null;
 
   public DataRequest datasource(String datasource) {
     this.datasource = datasource;
@@ -138,6 +145,55 @@ public class DataRequest   {
     this.filters = filters;
   }
 
+  public DataRequest orders(List<OrderRequest> orders) {
+    this.orders = orders;
+    return this;
+  }
+
+  public DataRequest addOrdersItem(OrderRequest ordersItem) {
+    if (this.orders == null) {
+      this.orders = new ArrayList<OrderRequest>();
+    }
+    this.orders.add(ordersItem);
+    return this;
+  }
+
+   /**
+   * Get orders
+   * @return orders
+  **/
+  @ApiModelProperty(value = "")
+
+  @Valid
+
+  public List<OrderRequest> getOrders() {
+    return orders;
+  }
+
+  public void setOrders(List<OrderRequest> orders) {
+    this.orders = orders;
+  }
+
+  public DataRequest limit(Integer limit) {
+    this.limit = limit;
+    return this;
+  }
+
+   /**
+   * Get limit
+   * @return limit
+  **/
+  @ApiModelProperty(value = "")
+
+
+  public Integer getLimit() {
+    return limit;
+  }
+
+  public void setLimit(Integer limit) {
+    this.limit = limit;
+  }
+
 
   @Override
   public boolean equals(Object o) {
@@ -151,12 +207,14 @@ public class DataRequest   {
     return Objects.equals(this.datasource, dataRequest.datasource) &&
         Objects.equals(this.kpis, dataRequest.kpis) &&
         Objects.equals(this.dimensions, dataRequest.dimensions) &&
-        Objects.equals(this.filters, dataRequest.filters);
+        Objects.equals(this.filters, dataRequest.filters) &&
+        Objects.equals(this.orders, dataRequest.orders) &&
+        Objects.equals(this.limit, dataRequest.limit);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(datasource, kpis, dimensions, filters);
+    return Objects.hash(datasource, kpis, dimensions, filters, orders, limit);
   }
 
   @Override
@@ -168,6 +226,8 @@ public class DataRequest   {
     sb.append("    kpis: ").append(toIndentedString(kpis)).append("\n");
     sb.append("    dimensions: ").append(toIndentedString(dimensions)).append("\n");
     sb.append("    filters: ").append(toIndentedString(filters)).append("\n");
+    sb.append("    orders: ").append(toIndentedString(orders)).append("\n");
+    sb.append("    limit: ").append(toIndentedString(limit)).append("\n");
     sb.append("}");
     return sb.toString();
   }

@@ -177,6 +177,12 @@ definitions:
         type: "array"
         items:
           $ref: "#/definitions/FilterRequest"
+      orders:
+        type: "array"
+        items:
+          $ref: "#/definitions/OrderRequest"
+      limit:
+        type: "integer"
 
   KpiRequest:
     type: "object"
@@ -219,6 +225,21 @@ definitions:
               type: "string"
       isNegative:
         type: "boolean"
+
+  OrderRequest:
+    type: "object"
+    properties:
+      dimension:
+        type: "string"
+      kpi:
+        type: "object"
+        properties:
+          name:
+            type: "string"
+          offeredMetric:
+            type: "string"
+      direction:
+        type: "string"
 
   DataResponse:
     type: "object"

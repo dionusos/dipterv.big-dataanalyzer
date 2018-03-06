@@ -157,4 +157,13 @@ public class Query {
     public void setLimit(Integer limit) {
         this.limit = limit;
     }
+
+    public void addOrder(String dimension, String direction) {
+        orderBys.add(new OrderBy(dimension, direction));
+    }
+
+    public void addOrder(KpiDef kDef, String offeredMetric, String direction) {
+        String calculation = getCalculationFor(kDef, offeredMetric);
+        orderBys.add(new OrderBy(calculation, direction));
+    }
 }

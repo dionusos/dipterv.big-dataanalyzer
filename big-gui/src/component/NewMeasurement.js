@@ -2,6 +2,7 @@ import React from 'react';
 import * as appstate from '../appstate.js';
 import './NewMeasurement.css'
 import Filter from './Filter.js'
+import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 
 class NewMeasurement extends React.Component {
     componentDidMount() {
@@ -17,30 +18,31 @@ class NewMeasurement extends React.Component {
     render() {
         return (
             <div id="addNewMeasurement">
-                <p>Select datastore</p>
-                <select id="datasourceSelector" onChange={appstate.datasourceSelected}>
-                </select>
-                <p>Select kpis</p>
-                <select id="kpisSelector" multiple>
-                </select>
-                <select className="dimensionsSelector" multiple>
-                </select>
-                <p>Select date</p>
-                <input type="date" name="starDate"/>
-                <input type="date" name="endDate"/>
-                <p>Filters</p>
-                {
-                    appstate.measurementFilters.map((filter) => (
-                        <Filter dimension={filter.dimension}/>
-                    ))
-                }
-                <p>Add new filter</p>
-                <select className="dimensionFilterAdderSelector">
-                    <option value="plate">Plate<input type="text"/></option>
-                </select>
-                <button onClick={this.addNewFilter}>Add...</button>
-                <p></p>
-                <button id="createMeasurement" onClick={appstate.addNewMeasurement}>New measurement</button>
+                    <FormGroup>
+                    <Label>Select datastore</Label>
+                    <Input type="select" id="datasourceSelector" onChange={appstate.datasourceSelected}>
+                    </Input>
+                    <Label>Select kpis</Label>
+                    <Input type="select" id="kpisSelector" multiple>
+                    </Input>
+                    <Input type="select" className="dimensionsSelector" multiple>
+                    </Input>
+                    <Label>Select date</Label>
+                    <Input type="date" name="starDate"/>
+                    <Input type="date" name="endDate"/>
+                    <p>Filters</p>
+                    {
+                        appstate.measurementFilters.map((filter) => (
+                            <Filter dimension={filter.dimension}/>
+                        ))
+                    }
+                    <Label>Add new filter</Label>
+                    <Input type="select" className="dimensionFilterAdderSelector">
+                    </Input>
+                    <button id={"noId"} onClick={this.addNewFilter}>Add...</button>
+                    <p></p>
+                    </FormGroup>
+                    <Button id="createMeasurement" onClick={appstate.addNewMeasurement}>New measurement</Button>
             </div>
         );
     }

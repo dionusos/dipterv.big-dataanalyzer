@@ -197,6 +197,9 @@ function generateMeasurementFilters() {
         }
         var fil = {"dimension": dimNames[i].innerHTML};
         fil.values = String(dimValues[i].value).split(",");
+        if (fil.values.length == 1 && fil.values[0] === '') {
+            continue;
+        }
         fil.isNegative= "false"
         fils.push(fil);
     }

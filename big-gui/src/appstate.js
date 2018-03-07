@@ -6,6 +6,18 @@ GoogleCharts.load(drawChart);
 export var dataStoreToKpis = {};
 export var dataStoreToDimensions = {};
 export var measurements = [];
+export var measurementFilters = [];
+
+export function loadState() {
+    if(localStorage['measurements'] !== undefined) {
+        measurements = JSON.parse(localStorage['measurements']);
+        notify();
+    }
+}
+
+export function saveState() {
+    localStorage['measurements'] = JSON.stringify(measurements);
+}
 
 export var callbacks = [];
 
@@ -39,6 +51,7 @@ export function datasourceSelected() {
     if(selectedValue in dataStoreToKpis) {
         updateKpiSelector(selectedValue);
         updateDimensionSelector(selectedValue, "dimensionsSelector");
+        updateDimensionSelector(selectedValue, "dimensionFilterAdderSelector");
         return;
     }
 
@@ -57,6 +70,7 @@ export function datasourceSelected() {
         if (xmlHttpD.readyState == 4 && xmlHttpD.status == 200) {
             dataStoreToDimensions[selectedValue] = JSON.parse(xmlHttpD.responseText);
             updateDimensionSelector(selectedValue, "dimensionsSelector");
+            updateDimensionSelector(selectedValue, "dimensionFilterAdderSelector");
         }
     }
     xmlHttpD.open( "GET", backend + "/metadata/datasource/" + selectedValue + "/dimension/list", true );
@@ -112,6 +126,7 @@ function createDrilldown(measurement, dimensionsToQuery, filters) {
     var drilldown = {};
     drilldown.id = nextID();
     drilldown.dimensions = dimensionsToQuery;
+    drilldown.chartType = "column";
     measurement.drilldowns.push(drilldown);
     if(filters === undefined) {
         filters = [];
@@ -145,7 +160,7 @@ export function addNewMeasurement() {
         dimensionsToQuery.push(d2);
     }
 
-    var measurement = createMeasurement(selectedDatasource, kpisToQuery);
+    var measurement = createMeasurement(selectedDatasource, kpisToQuery, generateMeasurementFilters());
 
     var drilldown = createDrilldown(measurement, dimensionsToQuery);
 
@@ -165,11 +180,30 @@ export function addNewMeasurement() {
     var params = {"datasource": selectedDatasource,
         "kpis": kpisToQuery,
         "dimensions": dimensionsToQuery,
-        "filters": []
+        "filters": measurement.filters
     };
     xmlHttp.send( JSON.stringify(params));
     notify();
     return xmlHttp.responseText;
+}
+
+function generateMeasurementFilters() {
+    var dimNames = document.getElementsByClassName("dimensionName");
+    var dimValues = document.getElementsByClassName("dimensionValue");
+    var fils = [];
+    for(var i in dimNames){
+        if( i === "length") {
+            break;
+        }
+        var fil = {"dimension": dimNames[i].innerHTML};
+        fil.values = String(dimValues[i].value).split(",");
+        if (fil.values.length == 1 && fil.values[0] === '') {
+            continue;
+        }
+        fil.isNegative= "false"
+        fils.push(fil);
+    }
+    return fils;
 }
 
 export function getSelectValues(select) {
@@ -209,7 +243,7 @@ export function drawChart(mea, dr) {
         title: header.slice(1).join(",") + " by " + header[0]
     };
 
-    var chart = new GoogleCharts.api.visualization.ColumnChart(document.getElementById("drilldown_" + mea + "_" + dr));
+    var chart = createChart(document.getElementById("drilldown_" + mea + "_" + dr), drilldown.chartType);
     drilldown.chart = chart;
     chart.draw(data, options);
 
@@ -298,20 +332,24 @@ export function newDrilldown(measurementId) {
     var drilldown = createDrilldown(measurement, getSelectValues(select));
     var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + measurementId)[0];
     var split = fixedDimensionAndValue.innerHTML.split("=");
-    var ds = split[0].split(",");
-    var vs = split[1].split(",");
-    for (var i in ds) {
-        var dim = ds[i];
-        var valu = vs[i];
-        drilldown.filters.push(
-            {
-                "dimension": dim,
-                "values": [valu],
-                "isNegative": "false"
-            }
-        );
+    if(split[0] !== "") {
+        var ds = split[0].split(",");
+        var vs = split[1].split(",");
+        for (var i in ds) {
+            var dim = ds[i];
+            var valu = vs[i];
+            drilldown.filters.push(
+                {
+                    "dimension": dim,
+                    "values": [valu],
+                    "isNegative": "false"
+                }
+            );
+        }
     }
 
+    var selectedChartType = getSelectValues(document.getElementsByClassName("charTypeSelector"+measurementId)[0])[0];
+    drilldown.chartType=selectedChartType;
     var xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
@@ -395,10 +433,11 @@ function fillDrilldownWithDataResponse(drilldown, dataResponse) {
     drilldown.header = header;
 }
 
-function notify() {
+export function notify() {
     for (var i in callbacks) {
         callbacks[i].update();
     }
+    //saveState();
 }
 
 export function deleteDrilldownsFrom(drilldownId) {
@@ -418,4 +457,18 @@ export function deleteDrilldownsFrom(drilldownId) {
         }
     }
     notify();
+}
+
+function createChart(div, chartType) {
+    if(chartType === "column") {
+        return new GoogleCharts.api.visualization.ColumnChart(div);
+    }
+
+    if(chartType === "pie") {
+        return new GoogleCharts.api.visualization.PieChart(div);
+    }
+
+    if(chartType === "timeseries") {
+        return new GoogleCharts.api.visualization.LineChart(div);
+    }
 }

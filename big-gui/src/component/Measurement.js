@@ -16,7 +16,7 @@ class Measurement extends React.Component {
                 <h2>Measurement id is {appstate.measurementById(this.props.id).id}</h2>
                 {
                     appstate.measurementById(this.props.id).drilldowns.map((drilldown) => (
-                        <Drilldown id={drilldown.id} measurement={this.props.id}/>
+                        <Drilldown key={drilldown.id} id={drilldown.id} measurement={this.props.id}/>
                     ))
                 }
                 <DrilldownDimensionSelector measurementId={this.props.id}/>

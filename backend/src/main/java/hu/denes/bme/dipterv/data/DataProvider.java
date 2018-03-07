@@ -8,6 +8,7 @@ import hu.denes.bme.dipterv.data.sql.GreaterOrEquals;
 import hu.denes.bme.dipterv.data.sql.GreaterThan;
 import hu.denes.bme.dipterv.data.sql.LessOrEquals;
 import hu.denes.bme.dipterv.data.sql.LessThan;
+import hu.denes.bme.dipterv.data.sql.MySqlQuery;
 import hu.denes.bme.dipterv.data.sql.Not;
 import hu.denes.bme.dipterv.data.sql.Or;
 import hu.denes.bme.dipterv.data.sql.Query;
@@ -23,6 +24,7 @@ import io.swagger.model.FilterRequest;
 import io.swagger.model.FilterRequestIntervals;
 import io.swagger.model.FilterRequestKpi;
 import io.swagger.model.KpiRequest;
+import io.swagger.model.OrderRequest;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -189,6 +191,28 @@ public class DataProvider {
             q.setHaving(havingExpression);
         }
 
+        if(request.getLimit() != null && request.getLimit() > 0) {
+            q.setLimit(request.getLimit());
+        }
+
+        if(request.getOrders() != null) {
+            for(OrderRequest o : request.getOrders()) {
+                String direction;
+                if(o.getDirection() != null && o.getDirection().equals("DESC")) {
+                    direction = "DESC";
+                } else {
+                    direction = "ASC";
+                }
+                if(o.getDimension() != null) {
+                    q.addOrder(o.getDimension(), direction);
+                } else {
+                    KpiDef kDef = ds.getKpiFor(o.getKpi().getName(), o.getKpi().getOfferedMetric());
+                    q.addOrder(kDef, o.getKpi().getOfferedMetric(), direction);
+                }
+
+            }
+        }
+
         response.setHeader(header);
 
         q.setSchema(ds.getShemasContaining(requestdKpis, requestdDimensions).get(0).getName());
@@ -229,7 +253,7 @@ public class DataProvider {
     }
 
     private Query createQuery(MeasurementDataSource mds) {
-        Query q = new Query();
+        Query q = new MySqlQuery();
         hu.denes.bme.dipterv.metadata.Datasource ds = mds.getDatasource();
         q.setUrl(ds.getUrl());
         q.setUser(ds.getUser());

@@ -27,6 +27,11 @@ class DrilldownDimensionSelector extends React.Component {
                     <div className={"fixedDimensionAndValue" + this.props.measurementId}></div>
                     <select className={"drilldownDimensionsSelector" + this.props.measurementId} multiple>
                     </select>
+                    <select className={"charTypeSelector" + this.props.measurementId}>
+                        <option value="column">Column</option>
+                        <option value="pie">Pie</option>
+                        <option value="timeseries">Time series</option>
+                    </select>
                     <button onClick={this.letsDrilldown}>Let's Drilldown</button>
                 </div>
 

@@ -10,6 +10,8 @@ public class Expression {
     public Expression(String expression, boolean quote){
         if(quote) {
             this.expression = "\"" + expression + "\"";
+        } else {
+            this.expression = expression;
         }
     }
 

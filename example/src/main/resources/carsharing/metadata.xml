@@ -155,4 +155,35 @@
         <friendlyName>vehicle_id</friendlyName>
         <datatype>STRING</datatype>
     </dimension>
+    <!--aggregator.statistics-->
+    <kpi>
+        <name>rownum</name>
+        <friendlyName>Number of rows</friendlyName>
+        <offeredMetric>
+            <name>sum</name>
+            <calculation>sum(rownum_sum)</calculation>
+            <friendlyName>Sum</friendlyName>
+            <description></description>
+        </offeredMetric>
+        <column>
+            <postfix>sum</postfix>
+            <datatype>INT32</datatype>
+        </column>
+    </kpi>
+    <dimension>
+        <name>schema</name>
+        <friendlyName>Schema</friendlyName>
+        <datatype>STRING</datatype>
+    </dimension>
+    <dimension>
+        <name>table</name>
+        <friendlyName>Table</friendlyName>
+        <datatype>STRING</datatype>
+    </dimension>
+    <dimension>
+        <name>start_time</name>
+        <friendlyName>Start time</friendlyName>
+        <datatype>INT32</datatype>
+    </dimension>
+
 </metadata>

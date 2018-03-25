@@ -30,18 +30,25 @@
         <dimension name="variant"/>
         <dimension name="vehicle_id"/>
     </schema>
-    <schema name="carsharing_position" source="carsharing">
+    <schema name="carsharing_color" source="carsharing">
         <table name="5min" resolution="300" source="flatted"/>
         <table name="15min" resolution="900" source="5min"/>
         <table name="1hour" resolution="3600" source="15min"/>
+        <table name="1day" resolution="86400" source="1hour"/>
         <kpi name="battery_level" metric="avg"/>
         <kpi name="estimated_km" metric="avg"/>
         <kpi name="estimated_km" metric="sum"/>
         <kpi name="samples" metric="sum"/>
-        <dimension name="timestamp"/>
-        <dimension name="address"/>
-        <dimension name="gps_lat"/>
-        <dimension name="gps_long"/>
+        <dimension name="start_time"/>
+        <dimension name="color_desc"/>
+        <dimension name="model"/>
         <dimension name="plate_number"/>
+    </schema>
+    <schema name="aggregator">
+        <table name="statistics" resolution="1"/>
+        <kpi name="rownum" metric="sum"/>
+        <dimension name="schema"/>
+        <dimension name="start_time"/>
+        <dimension name="table"/>
     </schema>
 </schemas>

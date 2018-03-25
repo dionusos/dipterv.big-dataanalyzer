@@ -6,6 +6,8 @@ import hu.denes.bme.dipterv.data.sql.Eq;
 import hu.denes.bme.dipterv.data.sql.Expression;
 import hu.denes.bme.dipterv.data.sql.GreaterOrEquals;
 import hu.denes.bme.dipterv.data.sql.GreaterThan;
+import hu.denes.bme.dipterv.data.sql.If;
+import hu.denes.bme.dipterv.data.sql.In;
 import hu.denes.bme.dipterv.data.sql.LessOrEquals;
 import hu.denes.bme.dipterv.data.sql.LessThan;
 import hu.denes.bme.dipterv.data.sql.MySqlQuery;
@@ -15,6 +17,8 @@ import hu.denes.bme.dipterv.data.sql.Query;
 import hu.denes.bme.dipterv.metadata.DimensionDef;
 import hu.denes.bme.dipterv.metadata.KpiDef;
 import hu.denes.bme.dipterv.metadata.MetadataProvider;
+import hu.denes.bme.dipterv.metadata.Schema;
+import hu.denes.bme.dipterv.metadata.Table;
 import hu.denes.bme.dipterv.metadata.datasource.MeasurementDataSource;
 import io.swagger.model.DataRequest;
 import io.swagger.model.DataResponse;
@@ -31,7 +35,10 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -80,12 +87,105 @@ public class DataProvider {
             }
         }
 
+        extractFilters(request, ds, q, null);
+
+        if(request.getLimit() != null && request.getLimit() > 0) {
+            q.setLimit(request.getLimit());
+        }
+
+        if(request.getOrders() != null) {
+            for(OrderRequest o : request.getOrders()) {
+                String direction;
+                if(o.getDirection() != null && o.getDirection().equals("DESC")) {
+                    direction = "DESC";
+                } else {
+                    direction = "ASC";
+                }
+                if(o.getDimension() != null) {
+                    q.addOrder(o.getDimension(), direction);
+                } else {
+                    KpiDef kDef = ds.getKpiFor(o.getKpi().getName(), o.getKpi().getOfferedMetric());
+                    q.addOrder(kDef, o.getKpi().getOfferedMetric(), direction);
+                }
+
+            }
+        }
+
+        response.setHeader(header);
+
+        Query helperQuery = createQuery(ds);
+        helperQuery.addDimension("`schema`");
+        helperQuery.addDimension("`table`");
+        helperQuery.setSchema("aggregator");
+        helperQuery.setTable("statistics");
+
+        If a = new If();
+        Iterator<String> it = ds.getTablesWithResolution().keySet().iterator();
+        If last = a;
+        while (it.hasNext()) {
+            String name = it.next();
+            Integer res = ds.getTablesWithResolution().get(name);
+            last.condition(new Eq().left(new Expression("`table`")).right(new Expression(name, true)));
+            last._true(new Expression(res));
+            if(it.hasNext()) {
+                last._false(new If());
+                last = (If)last.get_false();
+            } else {
+                last._false(new Expression(0));
+            }
+        }
+        helperQuery.addKpi("count(*) * " + a.toString(), "coverage");
+        helperQuery.addOrder("count(*) * " + a.toString(), "DESC");
+        helperQuery.addOrder("count(*)", "ASC");
+        helperQuery.setLimit(1);
+        extractFilters(request, ds, helperQuery, Arrays.asList("start_time"));
+        Or or = new Or();
+        for(Schema s : ds.getShemasContaining(requestdKpis, requestdDimensions)) {
+            or.add(new Eq().left(new Expression("`schema`")).right(new Expression(s.getName(), true)));
+        }
+
+        Connection conn = null;
+        try {
+            ResultSet rs;
+            rs = runQuery(conn, helperQuery);
+            while (rs.next()){
+                q.setSchema(rs.getString("schema"));
+                q.setTable(rs.getString("table"));
+            }
+            rs.close();
+            rs = runQuery(conn, q);
+            List<List<Object>> mx = new ArrayList<>();
+            while (rs.next()) {
+                List<Object> row = new ArrayList<>();
+                for(int i = 1; i <= response.getHeader().size(); ++i) {
+                    row.add(extractors.get(i).extract(rs, i));
+                }
+                mx.add(row);
+            }
+            response.setDataMatrix(mx);
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if(conn != null) {
+                    conn.close();
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return response;
+    }
+
+    private void extractFilters(DataRequest request, MeasurementDataSource ds, Query q, Collection<String> filterNameFilter) {
         if(request.getFilters() != null && !request.getFilters().isEmpty()) {
             And whereExpression = new And();
             And havingExpression = new And();
             for (FilterRequest filterRequest : request.getFilters()) {
-
-
+                if(filterNameFilter != null && filterRequest.getDimension() != null && !filterNameFilter.contains(filterRequest.getDimension())) {
+                    continue;
+                }
                 if (filterRequest.getDimension() != null) {
                     boolean shouldQuote = ds.getDimensionFor(filterRequest.getDimension()).getDatatype().equals("STRING");
                     if (filterRequest.getIsNegative()) {
@@ -190,66 +290,23 @@ public class DataProvider {
             q.setWhere(whereExpression);
             q.setHaving(havingExpression);
         }
+    }
 
-        if(request.getLimit() != null && request.getLimit() > 0) {
-            q.setLimit(request.getLimit());
-        }
+    private Connection createConnection(Query q) throws SQLException {
+        Properties props = new Properties();
+        props.setProperty("user", q.getUser());
+        props.setProperty("password", q.getPassword());
+        props.setProperty("useSSL", "false");
+        props.setProperty("serverTimezone", "UTC");
+        return DriverManager.getConnection(q.getUrl(),  props);
+    }
 
-        if(request.getOrders() != null) {
-            for(OrderRequest o : request.getOrders()) {
-                String direction;
-                if(o.getDirection() != null && o.getDirection().equals("DESC")) {
-                    direction = "DESC";
-                } else {
-                    direction = "ASC";
-                }
-                if(o.getDimension() != null) {
-                    q.addOrder(o.getDimension(), direction);
-                } else {
-                    KpiDef kDef = ds.getKpiFor(o.getKpi().getName(), o.getKpi().getOfferedMetric());
-                    q.addOrder(kDef, o.getKpi().getOfferedMetric(), direction);
-                }
-
-            }
-        }
-
-        response.setHeader(header);
-
-        q.setSchema(ds.getShemasContaining(requestdKpis, requestdDimensions).get(0).getName());
-        q.setTable(ds.getSchemas().getSchema().get(0).getTable().get(0).getName());
-
-        Connection conn = null;
-        try {
-            Properties props = new Properties();
-            props.setProperty("user", q.getUser());
-            props.setProperty("password", q.getPassword());
-            props.setProperty("useSSL", "false");
-            props.setProperty("serverTimezone", "UTC");
-            conn = DriverManager.getConnection(q.getUrl(),  props);
-            Statement statement = conn.createStatement();
-            String queryString = q.toString();
-            System.out.println("Running query: [" + queryString + "]");
-            ResultSet rs = statement.executeQuery(queryString);
-            List<List<Object>> mx = new ArrayList<>();
-            while (rs.next()) {
-                List<Object> row = new ArrayList<>();
-                for(int i = 1; i <= response.getHeader().size(); ++i) {
-                    row.add(extractors.get(i).extract(rs, i));
-                }
-                mx.add(row);
-            }
-            response.setDataMatrix(mx);
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } finally {
-            try {
-                conn.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return response;
+    private ResultSet runQuery(Connection conn, Query q) throws SQLException {
+        conn = createConnection(q);
+        Statement statement = conn.createStatement();
+        String queryString = q.toString();
+        System.out.println("Running query: [" + queryString + "]");
+        return statement.executeQuery(queryString);
     }
 
     private Query createQuery(MeasurementDataSource mds) {

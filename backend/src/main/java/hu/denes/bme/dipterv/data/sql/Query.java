@@ -29,6 +29,10 @@ public class Query {
         selects.add(s);
     }
 
+    public void addKpi(String expression, String alias) {
+        selects.add(new Select(expression, alias));
+    }
+
     public String getCalculationFor(KpiDef kDef, String offeredMetric) {
         String calculation = "";
         for(OfferedMetric om : kDef.getOfferedMetric()){
@@ -43,6 +47,11 @@ public class Query {
     public void addDimension(DimensionDef dim) {
         selects.add(new Select(dim.getName(), dim.getName()));
         groupBys.add(dim.getName());
+    }
+
+    public void addDimension(String dimensionName) {
+        selects.add(new Select(dimensionName, dimensionName));
+        groupBys.add(dimensionName);
     }
 
     public String getUrl() {
@@ -148,6 +157,10 @@ public class Query {
 
     public void setWhere(Expression where) {
         this.where = where;
+    }
+
+    public Expression getWhere() {
+        return where;
     }
 
     public void setHaving(And having) {

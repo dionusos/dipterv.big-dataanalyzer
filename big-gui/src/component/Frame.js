@@ -1,5 +1,5 @@
 import React from 'react';
-import * as appstate from '../appstate.js';
+import * as model from '../model/Model.js';
 import NewMeasurement from "./NewMeasurement";
 import Measurement from "./Measurement";
 import './Frame.css'
@@ -7,24 +7,15 @@ import './Frame.css'
 class Frame extends React.Component {
     constructor(props){
         super(props);
-        appstate.callbacks.push(this);
+        model.callbacks.push(this);
         this.state        = { count: 0 } ;
 
     }
 
-    incrementCount() {
+    update() {
         this.setState((prevState) => {
-            // Important: read `prevState` instead of `this.state` when updating.
             return {count: prevState.count + 1}
         });
-    }
-
-    componentWillReceiveProps(nextProps) {
-
-    }
-
-    update() {
-        this.incrementCount();
     }
 
     render() {
@@ -34,8 +25,8 @@ class Frame extends React.Component {
                 <div id="frame">
                     <div id="measurements">
                         {
-                            appstate.measurements.map((measurement) => (
-                            <Measurement key={measurement.id} id={measurement.id}/>
+                            model.measurements.map((measurement) => (
+                            <Measurement key={measurement.id} id={measurement.id} measurement={measurement}/>
                             ))
                         }
                         <NewMeasurement/>

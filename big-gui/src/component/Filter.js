@@ -1,5 +1,4 @@
 import React from 'react';
-import * as appstate from '../appstate.js';
 import './Filter.css'
 
 class Filter extends React.Component {

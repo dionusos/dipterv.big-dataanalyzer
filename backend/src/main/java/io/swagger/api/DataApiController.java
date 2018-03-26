@@ -30,8 +30,12 @@ public class DataApiController implements DataApi {
     private DataProvider dataProvider;
 
     public ResponseEntity<DataResponse> dataPost(@ApiParam(value = ""  )  @Valid @RequestBody DataRequest body) {
-        DataResponse response = dataProvider.getData(body);
-        return new ResponseEntity<DataResponse>(response, HttpStatus.OK);
+        try {
+            DataResponse response = dataProvider.getData(body);
+            return new ResponseEntity<DataResponse>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
 }

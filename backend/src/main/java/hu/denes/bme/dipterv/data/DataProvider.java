@@ -55,7 +55,7 @@ public class DataProvider {
 
     Map<String, ResultSetExtractor> typeToExtractor = new HashMap<>();
 
-    public DataResponse getData(final DataRequest request) {
+    public DataResponse getData(final DataRequest request) throws Exception {
         List<ResultSetExtractor> extractors = new ArrayList<>();
         extractors.add(new StringResultSetExtractor());
 
@@ -143,14 +143,20 @@ public class DataProvider {
         for(Schema s : ds.getShemasContaining(requestdKpis, requestdDimensions)) {
             or.add(new Eq().left(new Expression("`schema`")).right(new Expression(s.getName(), true)));
         }
-
+        if(null != helperQuery.getWhere() && !"".equals(helperQuery.getWhere().toString())) {
+            helperQuery.setWhere(new And(helperQuery.getWhere(), or));
+        } else {
+            helperQuery.setWhere(or);
+        }
         Connection conn = null;
         try {
             ResultSet rs;
             rs = runQuery(conn, helperQuery);
-            while (rs.next()){
+            if (rs.next()){
                 q.setSchema(rs.getString("schema"));
                 q.setTable(rs.getString("table"));
+            } else {
+                throw new Exception("No Schema found");
             }
             rs.close();
             rs = runQuery(conn, q);

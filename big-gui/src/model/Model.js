@@ -124,7 +124,6 @@ export function addNewMeasurement() {
     };
     xmlHttp.send( JSON.stringify(params));
     notify();
-    return xmlHttp.responseText;
 }
 
 function generateMeasurementFilters() {
@@ -161,40 +160,6 @@ export function getSelectValues(select) {
     return result;
 }
 
-export function drawChart(mea, dr) {
-    /*GoogleCharts.api.visualization.events.addListener(chart, 'select', function() {
-        var selection = drilldownByMeasurementIdId(mea, dr).chart.getSelection();
-        if(selection === undefined || selection.length == 0) {
-
-            return;
-        }
-        var r = drilldownByMeasurementIdId(mea, dr).dataMatrix[selection[0].row];
-        // Get the modal
-        var modal = document.getElementById('myModal'+ mea);
-
-        // Get the <span> element that closes the modal
-        // var span = document.getElementsByClassName("close)[0];
-
-        modal.style.display = "block";
-
-        // When the user clicks on <span> (x), close the modal
-        /* span.onclick = function() {
-             modal.style.display = "none";
-         }
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + mea)[0];
-        fixedDimensionAndValue.innerHTML = header[0] + "=" + r[0];
-
-    });*/
-}
-
 function nextID(){
     let id = ID;
     ID = ID + 1;
@@ -209,32 +174,6 @@ export function measurementById(id) {
         }
     }
     return null;
-}
-
-export function drilldownsByMeasurementId(id) {
-    var m = measurementById(id);
-    if (m === null) {
-        return null;
-    }
-    return m.drilldowns;
-}
-
-export function drilldownByMeasurementIdId(meas, drill) {
-    var m = measurementById(meas);
-    if (m === null) {
-        return null;
-    }
-    for(var i in m.drilldowns){
-        var d = m.drilldowns[i];
-        if(d.id === drill) {
-            return d;
-        }
-    }
-    return null;
-}
-
-export function datasourceByMeasurement(measurementId) {
-    return measurementById(measurementId).datasource;
 }
 
 export function newDrilldown(measurementId) {
@@ -373,7 +312,7 @@ export function deleteDrilldownsFrom(drilldown) {
         if(deleteFrom != -1) {
             m.drilldowns = m.drilldowns.slice(0, deleteFrom);
             deletedFromMeasurement = i;
-            
+
             break;
         }
     }
@@ -389,5 +328,16 @@ export function deleteDrilldownsFrom(drilldown) {
         }
     }
 
+    notify();
+}
+
+export function removeFilterFromNewMeasurement(dimension) {
+    var newMeasurementFilters = [];
+    for(var i in measurementFilters) {
+        if(measurementFilters[i].dimension != dimension) {
+            newMeasurementFilters.push(measurementFilters[i]);
+        }
+    }
+    measurementFilters = newMeasurementFilters;
     notify();
 }

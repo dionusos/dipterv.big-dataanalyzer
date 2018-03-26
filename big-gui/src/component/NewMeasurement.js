@@ -59,12 +59,17 @@ class NewMeasurement extends React.Component {
                     <Input type="date" name="endDate"/>
                     <p>Filters</p>
                     {
-                        /*model.measurementFilters.map((filter) => (
+                        model.measurementFilters.map((filter) => (
                             <Filter dimension={filter.dimension}/>
-                        ))*/
+                        ))
                     }
                     <Label>Add new filter</Label>
                     <Input type="select" className="dimensionFilterAdderSelector">
+                        {
+                            this.state.dimensions.map((dimension) => (
+                                <option value={dimension.name}>{dimension.displayName}</option>
+                            ))
+                        }
                     </Input>
                     <button id={"noId"} onClick={this.addNewFilter}>Add...</button>
                     <p></p>

@@ -1,16 +1,42 @@
 import {GoogleCharts} from 'google-charts';
-var ID = 0;
-var backend = "http://localhost:8080/big"
 
-GoogleCharts.load(drawChart);
 export var dataStoreToKpis = {};
 export var dataStoreToDimensions = {};
+export var datasourceList = [];
+export var selectedDatasource;
+export function selectDatasource(dataSource) {
+    selectedDatasource = dataSource;
+}
+export function setDatasourceList(list) {
+    datasourceList = list;
+}
 export var measurements = [];
+export function setMeasurements(list) {
+    measurements = list;
+}
 export var measurementFilters = [];
+
+export function makeHttpRequest(method, url, callback, payload) {
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.onreadystatechange = callback;
+    xmlHttp.open( method, url, true );
+    if(method === "POST") {
+        xmlHttp.setRequestHeader("Content-type", "application/json");
+        xmlHttp.send(JSON.stringify(payload));
+    } else {
+        xmlHttp.send(null);
+    }
+}
+
+
+var ID = 0;
+export var backend = "http://192.168.0.52:8080/big";
+
+GoogleCharts.load(drawChart);
 
 export function loadState() {
     if(localStorage['measurements'] !== undefined) {
-        measurements = JSON.parse(localStorage['measurements']);
+        setMeasurements(JSON.parse(localStorage['measurements']));
         notify();
     }
 }
@@ -20,93 +46,6 @@ export function saveState() {
 }
 
 export var callbacks = [];
-
-export function loadDataSources() {
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            var datasourceList = JSON.parse(xmlHttp.responseText);
-            for (var i in datasourceList) {
-                var ds = datasourceList[i];
-                var opt = document.createElement("option");
-                opt.value = ds.name;
-                opt.text = ds.displayName;
-                document.getElementById("datasourceSelector").appendChild(opt);
-                datasourceSelected();
-            }
-        }
-    }
-    xmlHttp.open( "GET", backend + "/metadata/datasources", true ); // false for synchronous request
-    xmlHttp.send( null );
-    return xmlHttp.responseText;
-}
-
-export function datasourceSelected() {
-    var selectBox = document.getElementById("datasourceSelector");
-    if(selectBox === null) {
-        return;
-    }
-    var selectedValue = selectBox.options[selectBox.selectedIndex].value;
-
-    if(selectedValue in dataStoreToKpis) {
-        updateKpiSelector(selectedValue);
-        updateDimensionSelector(selectedValue, "dimensionsSelector");
-        updateDimensionSelector(selectedValue, "dimensionFilterAdderSelector");
-        return;
-    }
-
-    var xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-            dataStoreToKpis[selectedValue] = JSON.parse(xmlHttp.responseText);
-            updateKpiSelector(selectedValue);
-        }
-    }
-    xmlHttp.open( "GET", backend + "/metadata/datasource/" + selectedValue + "/kpi/list", true );
-    xmlHttp.send( null );
-
-    var xmlHttpD = new XMLHttpRequest();
-    xmlHttpD.onreadystatechange = function() {
-        if (xmlHttpD.readyState == 4 && xmlHttpD.status == 200) {
-            dataStoreToDimensions[selectedValue] = JSON.parse(xmlHttpD.responseText);
-            updateDimensionSelector(selectedValue, "dimensionsSelector");
-            updateDimensionSelector(selectedValue, "dimensionFilterAdderSelector");
-        }
-    }
-    xmlHttpD.open( "GET", backend + "/metadata/datasource/" + selectedValue + "/dimension/list", true );
-    xmlHttpD.send( null );
-    return xmlHttp.responseText;
-}
-
-export function updateKpiSelector(datasource) {
-    var myNode = document.getElementById("kpisSelector");
-    while (myNode.firstChild) {
-        myNode.removeChild(myNode.firstChild);
-    }
-
-    for (var i in dataStoreToKpis[datasource]) {
-        var kpi = dataStoreToKpis[datasource][i];
-        var opt = document.createElement("option");
-        opt.value = kpi.name + "###" + kpi.offeredMetric;
-        opt.text = kpi.displayName;
-        document.getElementById("kpisSelector").appendChild(opt);
-    }
-}
-
-export function updateDimensionSelector(datasource, dimensionSelectorClass) {
-    var myNode = document.getElementsByClassName(dimensionSelectorClass)[0];
-    while (myNode.firstChild) {
-        myNode.removeChild(myNode.firstChild);
-    }
-
-    for (var i in dataStoreToDimensions[datasource]) {
-        var dimension = dataStoreToDimensions[datasource][i];
-        var opt = document.createElement("option");
-        opt.value = dimension.name;
-        opt.text = dimension.displayName;
-        document.getElementsByClassName(dimensionSelectorClass)[0].appendChild(opt);
-    }
-}
 
 function createMeasurement(selectedDatasource, kpisToQuery, filters) {
     var measurement = {};
@@ -125,6 +64,7 @@ function createMeasurement(selectedDatasource, kpisToQuery, filters) {
 function createDrilldown(measurement, dimensionsToQuery, filters) {
     var drilldown = {};
     drilldown.id = nextID();
+    drilldown.measurementId = measurement.id;
     drilldown.dimensions = dimensionsToQuery;
     drilldown.chartType = "column";
     measurement.drilldowns.push(drilldown);
@@ -170,9 +110,9 @@ export function addNewMeasurement() {
             var dataResponse = JSON.parse(xmlHttp.responseText);
 
             fillDrilldownWithDataResponse(drilldown, dataResponse);
-
-            notify();
-            drawChart(measurement.id, drilldown.id);
+            if (drilldown.callback !== null) {
+                drilldown.callback();
+            }
         }
     }
     xmlHttp.open( "POST", backend + "/data", true );
@@ -184,7 +124,6 @@ export function addNewMeasurement() {
     };
     xmlHttp.send( JSON.stringify(params));
     notify();
-    return xmlHttp.responseText;
 }
 
 function generateMeasurementFilters() {
@@ -221,65 +160,6 @@ export function getSelectValues(select) {
     return result;
 }
 
-export function drawChart(mea, dr) {
-    if(mea === null || dr === null) {
-        return;
-    }
-
-    var drilldown = drilldownByMeasurementIdId(mea, dr);
-    if(drilldown === null) {
-        return;
-    }
-    var header = drilldown.header;
-    var dataMatrix = drilldown.dataMatrix;
-    var mix = [];
-    mix.push(header);
-    for(var i in dataMatrix) {
-        mix.push(dataMatrix[i]);
-    }
-    var data = GoogleCharts.api.visualization.arrayToDataTable(mix);
-
-    var options = {
-        title: header.slice(1).join(",") + " by " + header[0]
-    };
-
-    var chart = createChart(document.getElementById("drilldown_" + mea + "_" + dr), drilldown.chartType);
-    drilldown.chart = chart;
-    chart.draw(data, options);
-
-    GoogleCharts.api.visualization.events.addListener(chart, 'select', function() {
-        var selection = drilldownByMeasurementIdId(mea, dr).chart.getSelection();
-        if(selection === undefined || selection.length == 0) {
-
-            return;
-        }
-        var r = drilldownByMeasurementIdId(mea, dr).dataMatrix[selection[0].row];
-        // Get the modal
-        var modal = document.getElementById('myModal'+ mea);
-
-        // Get the <span> element that closes the modal
-       // var span = document.getElementsByClassName("close)[0];
-
-        modal.style.display = "block";
-
-        // When the user clicks on <span> (x), close the modal
-       /* span.onclick = function() {
-            modal.style.display = "none";
-        }*/
-
-        // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
-
-        var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + mea)[0];
-        fixedDimensionAndValue.innerHTML = header[0] + "=" + r[0];
-
-    });
-}
-
 function nextID(){
     let id = ID;
     ID = ID + 1;
@@ -294,32 +174,6 @@ export function measurementById(id) {
         }
     }
     return null;
-}
-
-export function drilldownsByMeasurementId(id) {
-    var m = measurementById(id);
-    if (m === null) {
-        return null;
-    }
-    return m.drilldowns;
-}
-
-export function drilldownByMeasurementIdId(meas, drill) {
-    var m = measurementById(meas);
-    if (m === null) {
-        return null;
-    }
-    for(var i in m.drilldowns){
-        var d = m.drilldowns[i];
-        if(d.id === drill) {
-            return d;
-        }
-    }
-    return null;
-}
-
-export function datasourceByMeasurement(measurementId) {
-    return measurementById(measurementId).datasource;
 }
 
 export function newDrilldown(measurementId) {
@@ -356,9 +210,9 @@ export function newDrilldown(measurementId) {
             var dataResponse = JSON.parse(xmlHttp.responseText);
 
             fillDrilldownWithDataResponse(drilldown, dataResponse);
-
-            notify();
-            drawChart(measurement.id, drilldown.id);
+            if (drilldown.callback !== null) {
+                drilldown.callback();
+            }
         }
     }
     xmlHttp.open( "POST", backend + "/data", true );
@@ -384,8 +238,8 @@ export function newDrilldown(measurementId) {
         "filters": filters
     };
     xmlHttp.send( JSON.stringify(params));
-
     document.getElementById('myModal' + measurementId).style.display = "none";
+    notify();
 }
 function fillDrilldownWithDataResponse(drilldown, dataResponse) {
     var header = []
@@ -440,35 +294,50 @@ export function notify() {
     //saveState();
 }
 
-export function deleteDrilldownsFrom(drilldownId) {
+export function deleteDrilldownsFrom(drilldown) {
+    var deletedFromMeasurement = -1;
     for (var i in measurements) {
         var m = measurements[i];
+        if(m.id !== drilldown.measurementId) {
+            continue;
+        }
         var deleteFrom = -1;
         for(var j in m.drilldowns){
             var d = m.drilldowns[j];
-            if(d.id === drilldownId) {
+            if(d.id === drilldown.id) {
                 deleteFrom = j;
                 break;
             }
         }
         if(deleteFrom != -1) {
             m.drilldowns = m.drilldowns.slice(0, deleteFrom);
+            deletedFromMeasurement = i;
+
             break;
         }
     }
+    if(deletedFromMeasurement != -1) {
+        if(measurements[deletedFromMeasurement].drilldowns.length < 1) {
+            var newMeasurements = [];
+            for(var i in measurements) {
+                if(i != deletedFromMeasurement) {
+                    newMeasurements.push(measurements[i]);
+                }
+            }
+            setMeasurements(newMeasurements);
+        }
+    }
+
     notify();
 }
 
-function createChart(div, chartType) {
-    if(chartType === "column") {
-        return new GoogleCharts.api.visualization.ColumnChart(div);
+export function removeFilterFromNewMeasurement(dimension) {
+    var newMeasurementFilters = [];
+    for(var i in measurementFilters) {
+        if(measurementFilters[i].dimension != dimension) {
+            newMeasurementFilters.push(measurementFilters[i]);
+        }
     }
-
-    if(chartType === "pie") {
-        return new GoogleCharts.api.visualization.PieChart(div);
-    }
-
-    if(chartType === "timeseries") {
-        return new GoogleCharts.api.visualization.LineChart(div);
-    }
+    measurementFilters = newMeasurementFilters;
+    notify();
 }

@@ -1,5 +1,5 @@
 import React from 'react';
-import * as appstate from '../appstate.js';
+import * as model from '../model/Model.js';
 import './DrilldownDimensionSelector.css'
 
 class DrilldownDimensionSelector extends React.Component {
@@ -9,13 +9,10 @@ class DrilldownDimensionSelector extends React.Component {
     }
 
     componentDidMount() {
-        appstate.updateDimensionSelector(
-            appstate.datasourceByMeasurement(this.props.measurementId),
-            "drilldownDimensionsSelector" + this.props.measurementId);
     }
 
     letsDrilldown(e) {
-        appstate.newDrilldown(this.props.measurementId);
+        model.newDrilldown(this.props.measurementId);
     }
 
     render() {
@@ -26,13 +23,18 @@ class DrilldownDimensionSelector extends React.Component {
                     <p>Select some dimensions</p>
                     <div className={"fixedDimensionAndValue" + this.props.measurementId}></div>
                     <select className={"drilldownDimensionsSelector" + this.props.measurementId} multiple>
+                        {
+                            model.dataStoreToDimensions[model.selectedDatasource].map((dimension) => (
+                                <option value={dimension.name}>{dimension.displayName}</option>
+                            ))
+                        }
                     </select>
                     <select className={"charTypeSelector" + this.props.measurementId}>
                         <option value="column">Column</option>
                         <option value="pie">Pie</option>
                         <option value="timeseries">Time series</option>
                     </select>
-                    <button onClick={this.letsDrilldown}>Let's Drilldown</button>
+                    <button onClick={this.letsDrilldown}>Go!</button>
                 </div>
 
             </div>

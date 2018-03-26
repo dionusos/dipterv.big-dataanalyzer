@@ -32,7 +32,7 @@ export function makeHttpRequest(method, url, callback, payload) {
 var ID = 0;
 export var backend = "http://192.168.0.52:8080/big";
 
-GoogleCharts.load(drawChart);
+GoogleCharts.load();
 
 export function loadState() {
     if(localStorage['measurements'] !== undefined) {

@@ -4,27 +4,29 @@ import * as model from '../model/Model.js';
 import './NewMeasurement.css'
 import Filter from './Filter.js'
 import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
+import {connect} from 'react-redux'
+import { reloadDataSources } from '../actions/metadata-actions'
 
 class NewMeasurement extends React.Component {
-    constructor (){
-        super();
-        this.state = {
+    constructor (props){
+        super(props);
+        /*this.state = {
             datasourceList: [],
             kpis: [],
             dimensions: []
-        }
-        this.loadDataSources = this.loadDataSources.bind(this)
-        this.datasourceSelected = this.datasourceSelected.bind(this)
+        }*/
+        this.datasourceSelected = this.datasourceSelected.bind(this);
+        this.onUpdateDataSources = this.onUpdateDataSources.bind(this);
     }
 
-    componentDidMount() {
-        this.loadDataSources();
+    onUpdateDataSources() {
+        this.props.onUpdateDataSources();
     }
 
     addNewFilter() {
         var dim = model.getSelectValues(document.getElementsByClassName("dimensionFilterAdderSelector")[0])[0];
         model.measurementFilters.push({'dimension': dim});
-        model.notify();
+        //model.notify();
     }
 
     render() {
@@ -32,26 +34,27 @@ class NewMeasurement extends React.Component {
             <div id="addNewMeasurement">
                 <FormGroup>
                     <Label>Select datastore</Label>
-                    <Input type="select" id="datasourceSelector" onChange={this.datasourceSelected}>
+                    <Input type="select" id="datasourceSelector" >
                         {
-                            this.state.datasourceList.map((dataSource) => (
+                            this.props.metadata.datasources.map((dataSource) => (
                                 <option value={dataSource.name}>{dataSource.displayName}</option>
                             ))
                         }
                     </Input>
+                    <Button onClick={this.onUpdateDataSources}>Refresh</Button>
                     <Label>Select kpis</Label>
                     <Input type="select" id="kpisSelector" multiple>
                         {
-                            this.state.kpis.map((kpi) => (
+                            /*this.state.kpis.map((kpi) => (
                                 <option value={kpi.name + "###" + kpi.offeredMetric}>{kpi.displayName}</option>
-                            ))
+                            ))*/
                         }
                     </Input>
                     <Input type="select" className="dimensionsSelector" multiple>
                         {
-                            this.state.dimensions.map((dimension) => (
+                            /*this.state.dimensions.map((dimension) => (
                                 <option value={dimension.name}>{dimension.displayName}</option>
-                            ))
+                            ))*/
                         }
                     </Input>
                     <Label>Select date</Label>
@@ -66,9 +69,9 @@ class NewMeasurement extends React.Component {
                     <Label>Add new filter</Label>
                     <Input type="select" className="dimensionFilterAdderSelector">
                         {
-                            this.state.dimensions.map((dimension) => (
+                            /*this.state.dimensions.map((dimension) => (
                                 <option value={dimension.name}>{dimension.displayName}</option>
-                            ))
+                            ))*/
                         }
                     </Input>
                     <button id={"noId"} onClick={this.addNewFilter}>Add...</button>
@@ -81,21 +84,6 @@ class NewMeasurement extends React.Component {
 
     handleCreateNewMeasurement() {
         model.addNewMeasurement();
-    }
-
-    loadDataSources() {
-        var obj = this;
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                model.setDatasourceList(JSON.parse(xmlHttp.responseText));
-                obj.setState({datasourceList: model.datasourceList});
-                obj.datasourceSelected();
-            }
-        }
-        xmlHttp.open( "GET", model.backend + "/metadata/datasources", true ); // false for synchronous request
-        xmlHttp.send( null );
-        return xmlHttp.responseText;
     }
 
     datasourceSelected() {
@@ -144,4 +132,14 @@ class NewMeasurement extends React.Component {
     }
 }
 
-export default NewMeasurement;
+const mapStateToProps = (state, props) => {
+    return {
+        metadata: state.metadata
+    }
+}
+
+const mapActionsToProps = {
+    onUpdateDataSources: reloadDataSources
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(NewMeasurement);

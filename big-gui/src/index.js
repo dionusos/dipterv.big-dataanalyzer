@@ -24,7 +24,9 @@ const store = createStore(
     allReducers,
     {
         metadata:{
-            datasources: ["example1"]
+            datasources: [],
+            kpis: [],
+            dimensions: []
         }
      },
     allStoreEnhancers

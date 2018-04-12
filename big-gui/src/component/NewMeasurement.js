@@ -5,22 +5,22 @@ import './NewMeasurement.css'
 import Filter from './Filter.js'
 import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
 import {connect} from 'react-redux'
-import { reloadDataSources } from '../actions/metadata-actions'
+import {loadKpisForDataSource, reloadDataSources, loadDimensionsForDataSource} from '../actions/metadata-actions'
 
 class NewMeasurement extends React.Component {
-    constructor (props){
+    constructor(props) {
         super(props);
-        /*this.state = {
-            datasourceList: [],
-            kpis: [],
-            dimensions: []
-        }*/
-        this.datasourceSelected = this.datasourceSelected.bind(this);
         this.onUpdateDataSources = this.onUpdateDataSources.bind(this);
+        this.onDataSourceChanged = this.onDataSourceChanged.bind(this);
     }
 
     onUpdateDataSources() {
         this.props.onUpdateDataSources();
+    }
+
+    onDataSourceChanged(event) {
+        this.props.onUpdateKpiList(event.target.value);
+        this.props.onUpdateDimensionList(event.target.value);
     }
 
     addNewFilter() {
@@ -34,27 +34,26 @@ class NewMeasurement extends React.Component {
             <div id="addNewMeasurement">
                 <FormGroup>
                     <Label>Select datastore</Label>
-                    <Input type="select" id="datasourceSelector" >
+                    <Input type="select" id="datasourceSelector" onChange={this.onDataSourceChanged}>
                         {
                             this.props.metadata.datasources.map((dataSource) => (
                                 <option value={dataSource.name}>{dataSource.displayName}</option>
                             ))
                         }
                     </Input>
-                    <Button onClick={this.onUpdateDataSources}>Refresh</Button>
                     <Label>Select kpis</Label>
                     <Input type="select" id="kpisSelector" multiple>
                         {
-                            /*this.state.kpis.map((kpi) => (
+                            this.props.metadata.kpis && this.props.metadata.kpis.map((kpi) => (
                                 <option value={kpi.name + "###" + kpi.offeredMetric}>{kpi.displayName}</option>
-                            ))*/
+                            ))
                         }
                     </Input>
                     <Input type="select" className="dimensionsSelector" multiple>
                         {
-                            /*this.state.dimensions.map((dimension) => (
+                            this.props.metadata.dimensions && this.props.metadata.dimensions.map((dimension) => (
                                 <option value={dimension.name}>{dimension.displayName}</option>
-                            ))*/
+                            ))
                         }
                     </Input>
                     <Label>Select date</Label>
@@ -85,51 +84,6 @@ class NewMeasurement extends React.Component {
     handleCreateNewMeasurement() {
         model.addNewMeasurement();
     }
-
-    datasourceSelected() {
-        var obj = this;
-        var selectBox = document.getElementById("datasourceSelector");
-        if(selectBox === null) {
-            return;
-        }
-        var selectedValue = selectBox.options[selectBox.selectedIndex].value;
-        model.selectDatasource(selectedValue);
-
-        if(selectedValue in model.dataStoreToKpis) {
-            var newState = obj.state;
-            newState.kpis = model.dataStoreToKpis[selectedValue];
-            newState.dimensions = model.dataStoreToDimensions[selectedValue];
-            obj.setState(newState);
-            return;
-        }
-
-        var xmlHttp = new XMLHttpRequest();
-        xmlHttp.onreadystatechange = function() {
-            if (xmlHttp.readyState == 4 && xmlHttp.status == 200) {
-                var result = JSON.parse(xmlHttp.responseText);
-                var newState = obj.state;
-                model.dataStoreToKpis[selectedValue] = result;
-                newState.kpis = result;
-                obj.setState(newState);
-            }
-        }
-        xmlHttp.open( "GET", model.backend + "/metadata/datasource/" + selectedValue + "/kpi/list", true );
-        xmlHttp.send( null );
-
-        var xmlHttpD = new XMLHttpRequest();
-        xmlHttpD.onreadystatechange = function() {
-            if (xmlHttpD.readyState == 4 && xmlHttpD.status == 200) {
-                var result = JSON.parse(xmlHttpD.responseText);
-                var newState = obj.state;
-                model.dataStoreToDimensions[selectedValue] = result;
-                newState.dimensions = result;
-                obj.setState(newState);
-            }
-        }
-        xmlHttpD.open( "GET", model.backend + "/metadata/datasource/" + selectedValue + "/dimension/list", true );
-        xmlHttpD.send( null );
-        return xmlHttp.responseText;
-    }
 }
 
 const mapStateToProps = (state, props) => {
@@ -139,7 +93,9 @@ const mapStateToProps = (state, props) => {
 }
 
 const mapActionsToProps = {
-    onUpdateDataSources: reloadDataSources
+    onUpdateDataSources: reloadDataSources,
+    onUpdateKpiList: loadKpisForDataSource,
+    onUpdateDimensionList: loadDimensionsForDataSource
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(NewMeasurement);

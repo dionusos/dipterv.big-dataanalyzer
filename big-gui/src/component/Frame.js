@@ -29,7 +29,7 @@ class Frame extends React.Component {
                             <Measurement key={measurement.id} id={measurement.id} measurement={measurement}/>
                             ))
                         }
-                        <NewMeasurement/>
+                        <NewMeasurement store={this.props.store}/>
                     </div>
 
                 </div>

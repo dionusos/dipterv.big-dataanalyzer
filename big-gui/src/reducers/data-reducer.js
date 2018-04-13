@@ -1,5 +1,6 @@
 import {CREATE_MEASUREMENT} from "../actions/metadata-actions";
-import {FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER} from "../actions/data-actions";
+import {FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER, DELETE_DRILLDOWN} from "../actions/data-actions";
+import {measurements, notify, setMeasurements} from "../model/Model";
 
 export default function dataReducer(state={}, {type, payload}) {
     switch (type) {
@@ -60,6 +61,42 @@ export default function dataReducer(state={}, {type, payload}) {
                 }
             }
             return newState8;
+        case (DELETE_DRILLDOWN):
+            var deletedFromMeasurement = -1;
+            let delDDState = {};
+            Object.assign(delDDState, state);
+            for(var i = 0; i < delDDState.measurements.length; ++i) {
+                let m = delDDState.measurements[i];
+                if(m.id !== payload.measurementId) {
+                    continue;
+                }
+                var deleteFrom = -1;
+                for (var j = 0; j < m.drilldowns.length; ++j) {
+                    let d = m.drilldowns[j];
+                    if(d.id.id === payload.id) {
+                        deleteFrom = j;
+                        break;
+                    }
+                }
+                if(deleteFrom != -1) {
+                    m.drilldowns = m.drilldowns.slice(0, deleteFrom);
+                    deletedFromMeasurement = i;
+                    break;
+                }
+            }
+
+            if(deletedFromMeasurement != -1) {
+                if(delDDState.measurements[deletedFromMeasurement].drilldowns.length < 1) {
+                    var newMeasurements = [];
+                    for(var i in delDDState.measurements) {
+                        if(i != deletedFromMeasurement) {
+                            newMeasurements.push(delDDState.measurements[i]);
+                        }
+                    }
+                    delDDState.measurements = newMeasurements;
+                }
+            }
+            return delDDState;
         default:
             return state;
     }

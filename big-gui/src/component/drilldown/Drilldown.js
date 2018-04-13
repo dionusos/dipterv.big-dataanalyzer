@@ -3,11 +3,18 @@ import { Button, Card, CardBody } from 'reactstrap';
 import './Drilldown.css'
 import loading_cat from '../loading-cat.png'
 import {GoogleCharts} from "google-charts";
+import {deleteDrilldown} from "../../actions/data-actions";
+import {connect} from "react-redux";
 
 class Drilldown extends React.Component {
     constructor(props){
         super(props);
         this.drawChart = this.drawChart.bind(this);
+        this.onDeleteDrilldown = this.onDeleteDrilldown.bind(this);
+    }
+
+    onDeleteDrilldown() {
+        this.props.onDeleteDrilldown(this.props.drilldown.id);
     }
 
     render() {
@@ -21,7 +28,7 @@ class Drilldown extends React.Component {
                             <img src={loading_cat}/>
 
                         </div>
-                        <Button onClick={this.deleteFrom}>Delete</Button>
+                        <Button onClick={this.onDeleteDrilldown}>Delete</Button>
                     </CardBody>
                 </Card>
             </div>
@@ -101,4 +108,12 @@ class Drilldown extends React.Component {
     }
 }
 
-export default Drilldown;
+const mapStateToProps = (state, props) => {
+    return {data: state.data};
+}
+
+const mapActionsToProps = {
+    onDeleteDrilldown: deleteDrilldown
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(Drilldown);

@@ -5,11 +5,19 @@ export const LOAD_DATA = 'data:loadData';
 export const FILL_DRILLDOWN = 'data:fillDrilldown';
 export const ADD_FILTER = 'data:addFilter';
 export const REMOVE_FILTER = 'data:removeFilter';
+export const DELETE_DRILLDOWN = 'data:deleteDrilldown';
 
 export function fillDrilldown(data, id) {
     return {
         type: FILL_DRILLDOWN,
         payload: {data: data, drilldownId: id}
+    }
+}
+
+export function deleteDrilldown(drilldownId) {
+    return {
+        type: DELETE_DRILLDOWN,
+        payload: drilldownId
     }
 }
 

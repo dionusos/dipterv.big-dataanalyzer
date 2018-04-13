@@ -19,7 +19,7 @@ class Filter extends React.Component {
             <div className="measurementFilter">
                 <Label>{this.props.filter.dimension}</Label>
                 =
-                <Label>{this.props.filter.value}</Label>
+                <Label>{this.props.filter.values}</Label>
                 <Button onClick={this.onRemoveFilter}>X</Button>
             </div>
 

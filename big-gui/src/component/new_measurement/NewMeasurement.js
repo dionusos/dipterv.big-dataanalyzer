@@ -43,6 +43,7 @@ class NewMeasurement extends React.Component {
         measurement.kpis = [];
         measurement.filters = [];
         measurement.datasourceDimensions = this.props.metadata.dimensions;
+        measurement.upToDate = true;
         for(var i =0; i < this.props.metadata.selectedKpis.length; ++i){
             var k = this.props.metadata.selectedKpis[i].split("###");
             var k2 = {};
@@ -55,6 +56,7 @@ class NewMeasurement extends React.Component {
         drilldown.id = {measurementId: measurement.id, id: "0"};
         drilldown.dimensions = [];
         drilldown.chartType = "column";
+        drilldown.filters = [];
         for(var j =0; j < this.props.metadata.selectedDimensions.length; ++j){
             drilldown.dimensions.push({name: this.props.metadata.selectedDimensions[j]});
         }

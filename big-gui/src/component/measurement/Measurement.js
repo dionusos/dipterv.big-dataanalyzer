@@ -10,11 +10,12 @@ class Measurement extends React.Component {
 
     constructor(props){
         super(props);
-        this.state = { collapse: false };
+        this.state = { collapse: false, pendingFilters: false };
         this.onAddFilter = this.onAddFilter.bind(this);
         this.onFilterCandidateChanged = this.onFilterCandidateChanged.bind(this);
         this.onFilterCandidateValueChanged = this.onFilterCandidateValueChanged.bind(this);
         this.toggleShowFilter = this.toggleShowFilter.bind(this);
+        this.onApplyFilters = this.onApplyFilters.bind(this);
     }
 
     onAddFilter() {
@@ -42,10 +43,30 @@ class Measurement extends React.Component {
         this.setState(newStateFilter);
     }
 
+    onApplyFilters(){
+        let m = this.props.measurement;
+        m.upToDate = true;
+        var filters = m.filters;
+        for(var i = 0; i < this.props.measurement.drilldowns.length; ++i){
+            let d = this.props.measurement.drilldowns[i];
+            let dataQuery = {};
+            filters = filters.concat(d.filters);
+            dataQuery.id = d.id;
+            dataQuery.datasource = m.datasource;
+            dataQuery.kpis = m.kpis;
+            dataQuery.dimensions = d.dimensions;
+            dataQuery.filters = filters;
+            this.props.onLoadMeasurementData(dataQuery);
+        }
+    }
+
     render() {
         return (
             <div id="measurement">
                 <Button onClick={this.toggleShowFilter}>{!this.state.collapse ? "Show filters" : "Hide filters"}</Button>
+                {
+                    !this.props.measurement.upToDate ? <Button onClick={this.onApplyFilters}>Apply filters</Button> : ""
+                }
                 <Collapse isOpen={this.state.collapse}>
                     <ListGroup>
                     {
@@ -87,7 +108,7 @@ const mapStateToProps = (state, props) => {
 
 const mapActionsToProps = {
     onAddFilter: addFilter,
-    onLoadData: loadData
+    onLoadMeasurementData: loadData
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Measurement);

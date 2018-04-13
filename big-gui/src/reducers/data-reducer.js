@@ -35,7 +35,8 @@ export default function dataReducer(state={}, {type, payload}) {
             for(var i = 0; i < newState7.measurements.length; ++i) {
                 let m = newState7.measurements[i];
                 if(m.id === payload.measurement) {
-                    m.filters.push({dimension: payload.dimension, value: payload.value});
+                    m.filters.push({dimension: payload.dimension, values: payload.value.split(","), isNegative: false});
+                    m.upToDate = false;
                     break;
                 }
             }
@@ -54,6 +55,7 @@ export default function dataReducer(state={}, {type, payload}) {
                         }
                     }
                     m.filters = newFilters;
+                    m.upToDate = false;
                     break;
                 }
             }

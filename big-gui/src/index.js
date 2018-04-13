@@ -22,7 +22,7 @@ const allReducers = combineReducers({
 });
 
 const allStoreEnhancers = compose(
-    applyMiddleware(thunk)//,window.devToolsExtension && window.devToolsExtension()
+    applyMiddleware(thunk)
 );
 
 const store = createStore(

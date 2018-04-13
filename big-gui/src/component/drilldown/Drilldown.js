@@ -1,44 +1,45 @@
 import React from 'react';
 import { Button, Card, CardBody } from 'reactstrap';
 import './Drilldown.css'
-import loading_cat from './loading-cat.png'
+import loading_cat from '../loading-cat.png'
 import {GoogleCharts} from "google-charts";
-import * as model from '../model/Model';
+import {deleteDrilldown} from "../../actions/data-actions";
+import {connect} from "react-redux";
 
 class Drilldown extends React.Component {
     constructor(props){
         super(props);
-        this.deleteFrom = this.deleteFrom.bind(this);
         this.drawChart = this.drawChart.bind(this);
+        this.onDeleteDrilldown = this.onDeleteDrilldown.bind(this);
     }
 
-    deleteFrom() {
-        model.deleteDrilldownsFrom(this.props.drilldown);
-    }
-
-    componentDidMount() {
-        this.props.drilldown.callback = this.drawChart;
+    onDeleteDrilldown() {
+        this.props.onDeleteDrilldown(this.props.drilldown.id);
     }
 
     render() {
+        this.drawChart(this);
         return (
             <div>
                 <Card>
-                <h3>This is a drilldown, id={this.props.id}</h3>
+                <h3>This is a drilldown, id={this.props.drilldown.id.id}</h3>
                     <CardBody>
-                        <div id={"drilldown_" + this.props.measurement + "_" + this.props.id} className="drilldown">
+                        <div id={"drilldown_" + this.props.drilldown.id.measurementId + "_" + this.props.drilldown.id.id} className="drilldown">
                             <img src={loading_cat}/>
 
                         </div>
-                        <Button onClick={this.deleteFrom}>Delete</Button>
+                        <Button onClick={this.onDeleteDrilldown}>Delete</Button>
                     </CardBody>
                 </Card>
             </div>
         );
     }
 
-    drawChart() {
-        var drilldown = this.props.drilldown;
+    drawChart(context) {
+        var drilldown = context.props.drilldown;
+        if(drilldown.dataMatrix == null) {
+            return;
+        }
         var header = drilldown.header;
         var dataMatrix = drilldown.dataMatrix;
         var mix = [];
@@ -52,7 +53,10 @@ class Drilldown extends React.Component {
             title: header.slice(1).join(",") + " by " + header[0]
         };
 
-        var chart = this.createChart(document.getElementById("drilldown_" + this.props.measurement + "_" + this.props.id), drilldown.chartType);
+        var chart = context.createChart(
+            document.getElementById(
+                "drilldown_" + context.props.drilldown.id.measurementId + "_" + context.props.drilldown.id.id),
+            drilldown.chartType);
         drilldown.chart = chart;
         chart.draw(data, options);
 
@@ -104,4 +108,12 @@ class Drilldown extends React.Component {
     }
 }
 
-export default Drilldown;
+const mapStateToProps = (state, props) => {
+    return {data: state.data};
+}
+
+const mapActionsToProps = {
+    onDeleteDrilldown: deleteDrilldown
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(Drilldown);

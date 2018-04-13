@@ -36,6 +36,10 @@ export function reloadDataSources() {
             url: model.backend + "/metadata/datasources",
             success(result) {
                 dispatch(updateDataSources(result));
+                let datasource = result[0].name;
+                dispatch(loadKpisForDataSource(datasource));
+                dispatch(loadDimensionsForDataSource(datasource));
+                dispatch(updateSelectedDatasource(datasource));
             },
             error() {
 

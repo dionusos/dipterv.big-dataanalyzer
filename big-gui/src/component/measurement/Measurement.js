@@ -1,5 +1,5 @@
 import React from 'react';
-import Drilldown from "./Drilldown";
+import Drilldown from "../drilldown/Drilldown";
 import './Measurement.css'
 
 class Measurement extends React.Component {

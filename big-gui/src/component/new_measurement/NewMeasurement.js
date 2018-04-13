@@ -1,12 +1,9 @@
 import React from 'react';
-import * as action from '../model/action.js';
-import * as model from '../model/Model.js';
 import './NewMeasurement.css'
-import Filter from './Filter.js'
-import { Button, Form, FormGroup, Label, Input, FormText } from 'reactstrap';
+import { Button, FormGroup, Label, Input } from 'reactstrap';
 import {connect} from 'react-redux'
-import {loadKpisForDataSource, reloadDataSources, loadDimensionsForDataSource, updateSelectedKpis, updateSelectedDimensions, updateSelectedDatasource, createMeasurement} from '../actions/metadata-actions'
-import {loadData} from "../actions/data-actions";
+import {loadKpisForDataSource, reloadDataSources, loadDimensionsForDataSource, updateSelectedKpis, updateSelectedDimensions, updateSelectedDatasource, createMeasurement} from '../../actions/metadata-actions'
+import {loadData} from "../../actions/data-actions";
 
 class NewMeasurement extends React.Component {
     generateId() {
@@ -73,12 +70,6 @@ class NewMeasurement extends React.Component {
         this.props.onLoadMeasurementData(dataQuery);
     }
 
-    addNewFilter() {
-        var dim = model.getSelectValues(document.getElementsByClassName("dimensionFilterAdderSelector")[0])[0];
-        model.measurementFilters.push({'dimension': dim});
-        //model.notify();
-    }
-
     render() {
         return (
             <div id="addNewMeasurement">
@@ -109,21 +100,6 @@ class NewMeasurement extends React.Component {
                     <Label>Select date</Label>
                     <Input type="date" name="starDate"/>
                     <Input type="date" name="endDate"/>
-                    <p>Filters</p>
-                    {
-                        model.measurementFilters.map((filter) => (
-                            <Filter dimension={filter.dimension}/>
-                        ))
-                    }
-                    <Label>Add new filter</Label>
-                    <Input type="select" className="dimensionFilterAdderSelector">
-                        {
-                            /*this.state.dimensions.map((dimension) => (
-                                <option value={dimension.name}>{dimension.displayName}</option>
-                            ))*/
-                        }
-                    </Input>
-                    <button id={"noId"} onClick={this.addNewFilter}>Add...</button>
                     <p></p>
                     <Button id="createMeasurement" onClick={this.onCreateMeasurementPushed}>New measurement</Button>
                 </FormGroup>

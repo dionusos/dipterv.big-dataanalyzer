@@ -1,7 +1,6 @@
 import React from 'react';
-import * as model from '../model/Model.js';
-import NewMeasurement from "./NewMeasurement";
-import Measurement from "./Measurement";
+import NewMeasurement from "../new_measurement/NewMeasurement";
+import Measurement from "../measurement/Measurement";
 import './Frame.css'
 import {connect} from "react-redux";
 

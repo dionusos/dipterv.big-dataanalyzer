@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import Frame from './component/Frame';
+import Frame from './component/frame/Frame';
 import registerServiceWorker from './registerServiceWorker';
 import 'bootstrap/dist/css/bootstrap.css';
 import { reloadDataSources } from './actions/metadata-actions'

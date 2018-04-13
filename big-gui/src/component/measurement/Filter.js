@@ -1,6 +1,6 @@
 import React from 'react';
 import './Filter.css'
-import * as model from '../model/Model.js';
+import * as model from '../../model/Model.js';
 
 class Filter extends React.Component {
     constructor(props) {

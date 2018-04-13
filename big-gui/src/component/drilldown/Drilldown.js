@@ -1,19 +1,14 @@
 import React from 'react';
 import { Button, Card, CardBody } from 'reactstrap';
 import './Drilldown.css'
-import loading_cat from './loading-cat.png'
+import loading_cat from '../loading-cat.png'
 import {GoogleCharts} from "google-charts";
-import * as model from '../model/Model';
 
 class Drilldown extends React.Component {
     constructor(props){
         super(props);
         this.deleteFrom = this.deleteFrom.bind(this);
         this.drawChart = this.drawChart.bind(this);
-    }
-
-    deleteFrom() {
-        model.deleteDrilldownsFrom(this.props.drilldown);
     }
 
     render() {

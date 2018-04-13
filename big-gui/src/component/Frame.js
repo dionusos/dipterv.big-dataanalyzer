@@ -3,19 +3,12 @@ import * as model from '../model/Model.js';
 import NewMeasurement from "./NewMeasurement";
 import Measurement from "./Measurement";
 import './Frame.css'
+import {connect} from "react-redux";
 
 class Frame extends React.Component {
     constructor(props){
         super(props);
-        model.callbacks.push(this);
-        this.state        = { count: 0 } ;
 
-    }
-
-    update() {
-        this.setState((prevState) => {
-            return {count: prevState.count + 1}
-        });
     }
 
     render() {
@@ -25,8 +18,8 @@ class Frame extends React.Component {
                 <div id="frame">
                     <div id="measurements">
                         {
-                            model.measurements.map((measurement) => (
-                            <Measurement key={measurement.id} id={measurement.id} measurement={measurement}/>
+                            this.props.data.measurements.map((measurement) => (
+                                <Measurement key={measurement.id} measurement={measurement}/>
                             ))
                         }
                         <NewMeasurement store={this.props.store}/>
@@ -39,4 +32,10 @@ class Frame extends React.Component {
     }
 }
 
-export default Frame;
+const mapStateToProps = (state, props) => {
+    return {
+        data: state.data
+    }
+}
+
+export default connect(mapStateToProps)(Frame);

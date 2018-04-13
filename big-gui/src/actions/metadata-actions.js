@@ -4,6 +4,10 @@ import * as model from "../model/Model";
 export const UPDATE_DATASOURCES = 'metadata:updateDataSources';
 export const UPDATE_KPI_LIST = 'metadata:updateKpiList';
 export const UPDATE_DIMENSION_LIST = 'metadata:updateDimensionList';
+export const UPDATE_SELECTED_KPIS = 'metadata:updateSelectedKpis';
+export const UPDATE_SELECTED_DIMENSIONS = 'metadata:updateSelectedDimensions';
+export const UPDATE_SELECTED_DATASOURCE = 'metadata:updateSelectedDatasource';
+export const CREATE_MEASUREMENT = 'metadata:createMeasurement';
 
 export function updateDataSources(datasources) {
     return {
@@ -65,5 +69,33 @@ export function loadDimensionsForDataSource(dataSource) {
 
             }
         })
+    }
+}
+
+export function updateSelectedKpis(kpis) {
+    return {
+        type: UPDATE_SELECTED_KPIS,
+        payload: kpis
+    }
+}
+
+export function updateSelectedDimensions(dimensions) {
+    return {
+        type: UPDATE_SELECTED_DIMENSIONS,
+        payload: dimensions
+    }
+}
+
+export function updateSelectedDatasource(datasource) {
+    return {
+        type: UPDATE_SELECTED_DATASOURCE,
+        payload: datasource
+    }
+}
+
+export function createMeasurement(measurement) {
+    return {
+        type: CREATE_MEASUREMENT,
+        payload: measurement
     }
 }

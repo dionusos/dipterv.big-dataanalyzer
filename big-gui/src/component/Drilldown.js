@@ -16,17 +16,14 @@ class Drilldown extends React.Component {
         model.deleteDrilldownsFrom(this.props.drilldown);
     }
 
-    componentDidMount() {
-        this.props.drilldown.callback = this.drawChart;
-    }
-
     render() {
+        this.drawChart(this);
         return (
             <div>
                 <Card>
-                <h3>This is a drilldown, id={this.props.id}</h3>
+                <h3>This is a drilldown, id={this.props.drilldown.id.id}</h3>
                     <CardBody>
-                        <div id={"drilldown_" + this.props.measurement + "_" + this.props.id} className="drilldown">
+                        <div id={"drilldown_" + this.props.drilldown.id.measurementId + "_" + this.props.drilldown.id.id} className="drilldown">
                             <img src={loading_cat}/>
 
                         </div>
@@ -37,8 +34,11 @@ class Drilldown extends React.Component {
         );
     }
 
-    drawChart() {
-        var drilldown = this.props.drilldown;
+    drawChart(context) {
+        var drilldown = context.props.drilldown;
+        if(drilldown.dataMatrix == null) {
+            return;
+        }
         var header = drilldown.header;
         var dataMatrix = drilldown.dataMatrix;
         var mix = [];
@@ -52,7 +52,10 @@ class Drilldown extends React.Component {
             title: header.slice(1).join(",") + " by " + header[0]
         };
 
-        var chart = this.createChart(document.getElementById("drilldown_" + this.props.measurement + "_" + this.props.id), drilldown.chartType);
+        var chart = context.createChart(
+            document.getElementById(
+                "drilldown_" + context.props.drilldown.id.measurementId + "_" + context.props.drilldown.id.id),
+            drilldown.chartType);
         drilldown.chart = chart;
         chart.draw(data, options);
 

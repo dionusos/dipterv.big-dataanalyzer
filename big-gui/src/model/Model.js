@@ -1,4 +1,6 @@
-import {GoogleCharts} from 'google-charts';
+
+
+export var backend = "http://192.168.0.52:8080/big";
 
 export var dataStoreToKpis = {};
 export var dataStoreToDimensions = {};
@@ -29,10 +31,10 @@ export function makeHttpRequest(method, url, callback, payload) {
 }
 
 
-var ID = 0;
-export var backend = "http://192.168.0.52:8080/big";
 
-GoogleCharts.load();
+
+
+
 
 export function loadState() {
     if(localStorage['measurements'] !== undefined) {
@@ -159,8 +161,8 @@ export function getSelectValues(select) {
     }
     return result;
 }
-
-function nextID(){
+var ID = 0;
+export function nextID(){
     let id = ID;
     ID = ID + 1;
     return id;

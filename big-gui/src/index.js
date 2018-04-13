@@ -10,9 +10,15 @@ import thunk from 'redux-thunk';
 import {combineReducers, createStore, applyMiddleware, compose} from 'redux';
 import {Provider} from 'react-redux';
 import metadataReducer from './reducers/metadata-reducer';
+import dataReducer from "./reducers/data-reducer";
+import {GoogleCharts} from 'google-charts';
+
+GoogleCharts.load();
+
 
 const allReducers = combineReducers({
-    metadata: metadataReducer
+    metadata: metadataReducer,
+    data: dataReducer
 });
 
 const allStoreEnhancers = compose(
@@ -27,6 +33,9 @@ const store = createStore(
             datasources: [],
             kpis: [],
             dimensions: []
+        },
+        data: {
+            measurements: []
         }
      },
     allStoreEnhancers

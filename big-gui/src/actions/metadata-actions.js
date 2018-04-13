@@ -1,5 +1,5 @@
 import $ from 'jquery';
-import * as model from "../model/Model";
+import {BACKEND_ADDRESS} from "../config/config";
 
 export const UPDATE_DATASOURCES = 'metadata:updateDataSources';
 export const UPDATE_KPI_LIST = 'metadata:updateKpiList';
@@ -33,7 +33,7 @@ export function updateDimensionList(dimensions) {
 export function reloadDataSources() {
     return dispatch => {
         $.ajax({
-            url: model.backend + "/metadata/datasources",
+            url: BACKEND_ADDRESS + "/metadata/datasources",
             success(result) {
                 dispatch(updateDataSources(result));
                 let datasource = result[0].name;
@@ -51,7 +51,7 @@ export function reloadDataSources() {
 export function loadKpisForDataSource(dataSource) {
    return dispatch => {
        $.ajax({
-           url: model.backend + "/metadata/datasource/" + dataSource + "/kpi/list",
+           url: BACKEND_ADDRESS + "/metadata/datasource/" + dataSource + "/kpi/list",
            success(result) {
                dispatch(updateKpiList(result));
            },
@@ -65,7 +65,7 @@ export function loadKpisForDataSource(dataSource) {
 export function loadDimensionsForDataSource(dataSource) {
     return dispatch => {
         $.ajax({
-            url: model.backend + "/metadata/datasource/" + dataSource + "/dimension/list",
+            url: BACKEND_ADDRESS + "/metadata/datasource/" + dataSource + "/dimension/list",
             success(result) {
                 dispatch(updateDimensionList(result));
             },

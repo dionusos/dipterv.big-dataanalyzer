@@ -1,7 +1,6 @@
+import {BACKEND_ADDRESS} from "../config/config";
 import $ from 'jquery';
-import * as model from "../model/Model";
 
-export const LOAD_DATA = 'data:loadData';
 export const FILL_DRILLDOWN = 'data:fillDrilldown';
 export const ADD_FILTER = 'data:addFilter';
 export const REMOVE_FILTER = 'data:removeFilter';
@@ -24,7 +23,7 @@ export function deleteDrilldown(drilldownId) {
 export function loadData(dataQuery) {
     return dispatch => {
         $.ajax({
-            url: model.backend + "/data",
+            url: BACKEND_ADDRESS + "/data",
             type: "POST",
             data: JSON.stringify({
                 datasource: dataQuery.datasource,

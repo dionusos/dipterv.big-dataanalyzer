@@ -1,6 +1,5 @@
 import {CREATE_MEASUREMENT} from "../actions/metadata-actions";
 import {FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER, DELETE_DRILLDOWN} from "../actions/data-actions";
-import {measurements, notify, setMeasurements} from "../model/Model";
 
 export default function dataReducer(state={}, {type, payload}) {
     switch (type) {

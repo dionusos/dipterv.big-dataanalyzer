@@ -7,7 +7,6 @@ import {GoogleCharts} from "google-charts";
 class Drilldown extends React.Component {
     constructor(props){
         super(props);
-        this.deleteFrom = this.deleteFrom.bind(this);
         this.drawChart = this.drawChart.bind(this);
     }
 

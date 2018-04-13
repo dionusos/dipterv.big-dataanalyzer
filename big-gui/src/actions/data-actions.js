@@ -3,6 +3,8 @@ import * as model from "../model/Model";
 
 export const LOAD_DATA = 'data:loadData';
 export const FILL_DRILLDOWN = 'data:fillDrilldown';
+export const ADD_FILTER = 'data:addFilter';
+export const REMOVE_FILTER = 'data:removeFilter';
 
 export function fillDrilldown(data, id) {
     return {
@@ -19,7 +21,8 @@ export function loadData(dataQuery) {
             data: JSON.stringify({
                 datasource: dataQuery.datasource,
                 kpis: dataQuery.kpis,
-                dimensions: dataQuery.dimensions
+                dimensions: dataQuery.dimensions,
+                filters: dataQuery.filters
             }),
             contentType:"application/json; charset=utf-8",
             success(result) {
@@ -29,5 +32,19 @@ export function loadData(dataQuery) {
 
             }
         })
+    }
+}
+
+export function addFilter(measurement, dimension, value) {
+    return {
+        type: ADD_FILTER,
+        payload: {measurement: measurement, dimension: dimension, value: value}
+    }
+}
+
+export function removeFilter(measurement, dimension) {
+    return {
+        type: REMOVE_FILTER,
+        payload: {measurement: measurement, dimension: dimension}
     }
 }

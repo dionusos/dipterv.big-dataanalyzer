@@ -41,6 +41,8 @@ class NewMeasurement extends React.Component {
         let measurement = {};
         measurement.id = this.generateId();
         measurement.kpis = [];
+        measurement.filters = [];
+        measurement.datasourceDimensions = this.props.metadata.dimensions;
         for(var i =0; i < this.props.metadata.selectedKpis.length; ++i){
             var k = this.props.metadata.selectedKpis[i].split("###");
             var k2 = {};
@@ -67,6 +69,7 @@ class NewMeasurement extends React.Component {
         dataQuery.datasource = measurement.datasource;
         dataQuery.kpis = measurement.kpis;
         dataQuery.dimensions = measurement.drilldowns[0].dimensions;
+        dataQuery.filters = [];
         this.props.onLoadMeasurementData(dataQuery);
     }
 

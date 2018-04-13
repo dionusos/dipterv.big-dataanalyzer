@@ -1,26 +1,38 @@
 import React from 'react';
 import './Filter.css'
-import * as model from '../../model/Model.js';
+import { Button, ListGroup, Label, Input, ListGroupItem } from 'reactstrap';
+import {removeFilter} from "../../actions/data-actions";
+import {connect} from "react-redux";
 
 class Filter extends React.Component {
     constructor(props) {
         super(props);
-        this.removeIt = this.removeIt.bind(this)
+        this.onRemoveFilter = this.onRemoveFilter.bind(this);
     }
 
-    removeIt() {
-        model.removeFilterFromNewMeasurement(this.props.dimension);
+    onRemoveFilter(event) {
+        this.props.onRemoveFilter(this.props.measurementId, this.props.filter.dimension);
     }
 
     render() {
         return (
             <div className="measurementFilter">
-                <div className="dimensionName">{this.props.dimension}</div>=<input className="dimensionValue" type="text"/>
-                <button onClick={this.removeIt}>Remove</button>
+                <Label>{this.props.filter.dimension}</Label>
+                =
+                <Label>{this.props.filter.value}</Label>
+                <Button onClick={this.onRemoveFilter}>X</Button>
             </div>
 
         );
     }
 }
 
-export default Filter;
+const mapStateToProps = (state, props) => {
+    return {data: state.data};
+}
+
+const mapActionsToProps = {
+    onRemoveFilter: removeFilter
+}
+
+export default connect(mapStateToProps, mapActionsToProps)(Filter);

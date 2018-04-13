@@ -1,5 +1,5 @@
 import {CREATE_MEASUREMENT} from "../actions/metadata-actions";
-import {FILL_DRILLDOWN} from "../actions/data-actions";
+import {FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER} from "../actions/data-actions";
 
 export default function dataReducer(state={}, {type, payload}) {
     switch (type) {
@@ -29,7 +29,35 @@ export default function dataReducer(state={}, {type, payload}) {
                 }
             }
             return newState2;
-
+        case(ADD_FILTER):
+            let newState7 = {};
+            Object.assign(newState7, state);
+            for(var i = 0; i < newState7.measurements.length; ++i) {
+                let m = newState7.measurements[i];
+                if(m.id === payload.measurement) {
+                    m.filters.push({dimension: payload.dimension, value: payload.value});
+                    break;
+                }
+            }
+            return newState7;
+        case(REMOVE_FILTER):
+            let newState8 = {};
+            Object.assign(newState8, state);
+            for(var i8 = 0; i8 < newState8.measurements.length; ++i8) {
+                let m = newState8.measurements[i8];
+                if(m.id === payload.measurement) {
+                    let newFilters = [];
+                    for(var j8 = 0; j8 < m.filters.length; ++j8) {
+                        let f = m.filters[j8];
+                        if(payload.dimension != f.dimension) {
+                            newFilters.push(f);
+                        }
+                    }
+                    m.filters = newFilters;
+                    break;
+                }
+            }
+            return newState8;
         default:
             return state;
     }

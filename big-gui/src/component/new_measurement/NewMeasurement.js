@@ -4,6 +4,8 @@ import { Button, FormGroup, Label, Input } from 'reactstrap';
 import {connect} from 'react-redux'
 import {loadKpisForDataSource, reloadDataSources, loadDimensionsForDataSource, updateSelectedKpis, updateSelectedDimensions, updateSelectedDatasource, createMeasurement} from '../../actions/metadata-actions'
 import {loadData} from "../../actions/data-actions";
+import {LIMIT_DEFAULT} from "../../config/config";
+import {dataQueryFromDrilldown} from "../../util/util";
 
 class NewMeasurement extends React.Component {
     generateId() {
@@ -54,6 +56,8 @@ class NewMeasurement extends React.Component {
         measurement.drilldowns = [];
         let drilldown = {};
         drilldown.id = {measurementId: measurement.id, id: "0"};
+        drilldown.measurement = measurement;
+        drilldown.limit = LIMIT_DEFAULT;
         drilldown.dimensions = [];
         drilldown.chartType = "column";
         drilldown.filters = [];
@@ -66,13 +70,7 @@ class NewMeasurement extends React.Component {
         measurement.drilldowns.push(drilldown);
 
         this.props.onCreateMeasurement(measurement);
-        let dataQuery = {};
-        dataQuery.id = drilldown.id;
-        dataQuery.datasource = measurement.datasource;
-        dataQuery.kpis = measurement.kpis;
-        dataQuery.dimensions = measurement.drilldowns[0].dimensions;
-        dataQuery.filters = [];
-        this.props.onLoadMeasurementData(dataQuery);
+        this.props.onLoadMeasurementData(dataQueryFromDrilldown(drilldown));
     }
 
     render() {

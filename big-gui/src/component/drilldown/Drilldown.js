@@ -3,7 +3,7 @@ import {Button, Card, CardBody, Collapse, Input} from 'reactstrap';
 import './Drilldown.css'
 import loading_cat from '../loading-cat.png'
 import {GoogleCharts} from "google-charts";
-import {changeDrilldownLimit, deleteDrilldown, loadData} from "../../actions/data-actions";
+import {changeChartType, changeDrilldownLimit, deleteDrilldown, loadData} from "../../actions/data-actions";
 import {connect} from "react-redux";
 import {dataQueryFromDrilldown} from "../../util/util";
 
@@ -16,6 +16,7 @@ class Drilldown extends React.Component {
         this.onDeleteDrilldown = this.onDeleteDrilldown.bind(this);
         this.onLoadMeasurementData = this.onLoadMeasurementData.bind(this);
         this.onDrilldownLimitChanged = this.onDrilldownLimitChanged.bind(this);
+        this.onChartTypeSelected = this.onChartTypeSelected.bind(this);
     }
 
     onDeleteDrilldown() {
@@ -28,6 +29,10 @@ class Drilldown extends React.Component {
 
     onDrilldownLimitChanged(event){
         this.props.onDrilldownLimitChanged(this.props.drilldown.id, event.target.value);
+    }
+
+    onChartTypeSelected(event){
+        this.props.onChartTypeSelected(this.props.drilldown.id, event.target.value);
     }
 
     toggleShowFilter() {
@@ -50,6 +55,13 @@ class Drilldown extends React.Component {
                         </div>
                         <Button onClick={this.toggleShowFilter}>{!this.state.collapse ? "Show customization" : "Hide customization"}</Button>
                         <Collapse isOpen={this.state.collapse}>
+                            <Input type="select" id="chartTypeSelector"  onChange={this.onChartTypeSelected}>
+                                {
+                                    ["column", "pie", "timeseries"].map((chartType) => (
+                                        <option value={chartType}>{chartType}</option>
+                                    ))
+                                }
+                            </Input>
                             <Input type="number" name="limit" id="limitInput" placeholder={this.props.drilldown.limit} min="1" onChange={this.onDrilldownLimitChanged}/>
                             <Button onClick={this.onLoadMeasurementData}>Update</Button>
                             <Button onClick={this.onDeleteDrilldown}>Delete</Button>
@@ -140,7 +152,8 @@ const mapStateToProps = (state, props) => {
 const mapActionsToProps = {
     onDeleteDrilldown: deleteDrilldown,
     onLoadMeasurementData: loadData,
-    onDrilldownLimitChanged: changeDrilldownLimit
+    onDrilldownLimitChanged: changeDrilldownLimit,
+    onChartTypeSelected: changeChartType
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Drilldown);

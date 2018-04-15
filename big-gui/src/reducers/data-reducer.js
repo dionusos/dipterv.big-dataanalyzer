@@ -1,7 +1,7 @@
 import {CREATE_MEASUREMENT} from "../actions/metadata-actions";
 import {
     FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER, DELETE_DRILLDOWN,
-    UPDATE_DRILLDOWN_LIMIT
+    UPDATE_DRILLDOWN_LIMIT, UPDATE_DRILLDOWN_CHART_TYPE
 } from "../actions/data-actions";
 
 export default function dataReducer(state={}, {type, payload}) {
@@ -101,6 +101,22 @@ export default function dataReducer(state={}, {type, payload}) {
                     let d = m.drilldowns[j];
                     if(d.id.id === payload.drilldownId.id) {
                         d.limit = payload.limit;
+                        break;
+                    }
+                }
+                break;
+            }
+            return newState;
+        case(UPDATE_DRILLDOWN_CHART_TYPE):
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
+                if(m.id !== payload.drilldownId.measurementId) {
+                    continue;
+                }
+                for (var j = 0; j < m.drilldowns.length; ++j) {
+                    let d = m.drilldowns[j];
+                    if(d.id.id === payload.drilldownId.id) {
+                        d.chartType = payload.type;
                         break;
                     }
                 }

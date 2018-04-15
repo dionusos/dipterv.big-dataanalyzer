@@ -1,22 +1,23 @@
 import {CREATE_MEASUREMENT} from "../actions/metadata-actions";
-import {FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER, DELETE_DRILLDOWN} from "../actions/data-actions";
+import {
+    FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER, DELETE_DRILLDOWN,
+    UPDATE_DRILLDOWN_LIMIT, UPDATE_DRILLDOWN_CHART_TYPE
+} from "../actions/data-actions";
 
 export default function dataReducer(state={}, {type, payload}) {
+    let newState = {};
+    Object.assign(newState, state);
     switch (type) {
         case (CREATE_MEASUREMENT):
-            let newState = {};
-            Object.assign(newState, state);
             if (newState.measurements == null) {
                 newState.measurements = [];
             }
             newState.measurements.push(payload);
             return newState;
         case (FILL_DRILLDOWN):
-            let newState2 = {};
-            Object.assign(newState2, state);
             let ddId = payload.drilldownId;
-            for(var i = 0; i < newState2.measurements.length; ++i) {
-                let m = newState2.measurements[i];
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
                 if(m.id === ddId.measurementId) {
                     for (var j = 0; j < m.drilldowns.length; ++j) {
                         let d = m.drilldowns[j];
@@ -28,24 +29,20 @@ export default function dataReducer(state={}, {type, payload}) {
                     break;
                 }
             }
-            return newState2;
+            return newState;
         case(ADD_FILTER):
-            let newState7 = {};
-            Object.assign(newState7, state);
-            for(var i = 0; i < newState7.measurements.length; ++i) {
-                let m = newState7.measurements[i];
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
                 if(m.id === payload.measurement) {
                     m.filters.push({dimension: payload.dimension, values: payload.value.split(","), isNegative: false});
                     m.upToDate = false;
                     break;
                 }
             }
-            return newState7;
+            return newState;
         case(REMOVE_FILTER):
-            let newState8 = {};
-            Object.assign(newState8, state);
-            for(var i8 = 0; i8 < newState8.measurements.length; ++i8) {
-                let m = newState8.measurements[i8];
+            for(var i8 = 0; i8 < newState.measurements.length; ++i8) {
+                let m = newState.measurements[i8];
                 if(m.id === payload.measurement) {
                     let newFilters = [];
                     for(var j8 = 0; j8 < m.filters.length; ++j8) {
@@ -59,13 +56,11 @@ export default function dataReducer(state={}, {type, payload}) {
                     break;
                 }
             }
-            return newState8;
+            return newState;
         case (DELETE_DRILLDOWN):
             var deletedFromMeasurement = -1;
-            let delDDState = {};
-            Object.assign(delDDState, state);
-            for(var i = 0; i < delDDState.measurements.length; ++i) {
-                let m = delDDState.measurements[i];
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
                 if(m.id !== payload.measurementId) {
                     continue;
                 }
@@ -85,17 +80,49 @@ export default function dataReducer(state={}, {type, payload}) {
             }
 
             if(deletedFromMeasurement != -1) {
-                if(delDDState.measurements[deletedFromMeasurement].drilldowns.length < 1) {
+                if(newState.measurements[deletedFromMeasurement].drilldowns.length < 1) {
                     var newMeasurements = [];
-                    for(var i in delDDState.measurements) {
+                    for(var i in newState.measurements) {
                         if(i != deletedFromMeasurement) {
-                            newMeasurements.push(delDDState.measurements[i]);
+                            newMeasurements.push(newState.measurements[i]);
                         }
                     }
-                    delDDState.measurements = newMeasurements;
+                    newState.measurements = newMeasurements;
                 }
             }
-            return delDDState;
+            return newState;
+        case (UPDATE_DRILLDOWN_LIMIT):
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
+                if(m.id !== payload.drilldownId.measurementId) {
+                    continue;
+                }
+                for (var j = 0; j < m.drilldowns.length; ++j) {
+                    let d = m.drilldowns[j];
+                    if(d.id.id === payload.drilldownId.id) {
+                        d.limit = payload.limit;
+                        break;
+                    }
+                }
+                break;
+            }
+            return newState;
+        case(UPDATE_DRILLDOWN_CHART_TYPE):
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
+                if(m.id !== payload.drilldownId.measurementId) {
+                    continue;
+                }
+                for (var j = 0; j < m.drilldowns.length; ++j) {
+                    let d = m.drilldowns[j];
+                    if(d.id.id === payload.drilldownId.id) {
+                        d.chartType = payload.type;
+                        break;
+                    }
+                }
+                break;
+            }
+            return newState;
         default:
             return state;
     }

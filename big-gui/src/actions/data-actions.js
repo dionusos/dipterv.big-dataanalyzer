@@ -5,6 +5,8 @@ export const FILL_DRILLDOWN = 'data:fillDrilldown';
 export const ADD_FILTER = 'data:addFilter';
 export const REMOVE_FILTER = 'data:removeFilter';
 export const DELETE_DRILLDOWN = 'data:deleteDrilldown';
+export const UPDATE_DRILLDOWN_LIMIT = 'data:updateDrilldownLimit';
+export const UPDATE_DRILLDOWN_CHART_TYPE = 'data:updateDrilldownChartType';
 
 export function fillDrilldown(data, id) {
     return {
@@ -29,7 +31,9 @@ export function loadData(dataQuery) {
                 datasource: dataQuery.datasource,
                 kpis: dataQuery.kpis,
                 dimensions: dataQuery.dimensions,
-                filters: dataQuery.filters
+                filters: dataQuery.filters,
+                orders: dataQuery.orders,
+                limit: dataQuery.limit
             }),
             contentType:"application/json; charset=utf-8",
             success(result) {
@@ -53,5 +57,19 @@ export function removeFilter(measurement, dimension) {
     return {
         type: REMOVE_FILTER,
         payload: {measurement: measurement, dimension: dimension}
+    }
+}
+
+export function changeDrilldownLimit(drilldownId, limit) {
+    return {
+        type: UPDATE_DRILLDOWN_LIMIT,
+        payload: {drilldownId: drilldownId, limit: limit}
+    }
+}
+
+export function changeChartType(drilldownId, type) {
+    return {
+        type: UPDATE_DRILLDOWN_CHART_TYPE,
+        payload: {drilldownId: drilldownId, type: type}
     }
 }

@@ -42,5 +42,13 @@
         <dimension name="start_time"/>
         <dimension name="color_desc"/>
         <dimension name="model"/>
+        <dimension name="plate_number"/>
+    </schema>
+    <schema name="aggregator">
+        <table name="statistics" resolution="1"/>
+        <kpi name="rownum" metric="sum"/>
+        <dimension name="schema"/>
+        <dimension name="start_time"/>
+        <dimension name="table"/>
     </schema>
 </schemas>

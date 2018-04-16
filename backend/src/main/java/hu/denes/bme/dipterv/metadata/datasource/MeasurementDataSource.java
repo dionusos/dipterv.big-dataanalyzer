@@ -9,6 +9,7 @@ import hu.denes.bme.dipterv.metadata.Metadata;
 import hu.denes.bme.dipterv.metadata.OfferedMetric;
 import hu.denes.bme.dipterv.metadata.Schema;
 import hu.denes.bme.dipterv.metadata.Schemas;
+import hu.denes.bme.dipterv.metadata.Table;
 import io.swagger.model.DimensionRequest;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -109,6 +110,16 @@ public class MeasurementDataSource {
             matchingSchemas.add(s);
         }
         return matchingSchemas;
+    }
+
+    public Map<String, Integer> getTablesWithResolution() {
+        Map<String, Integer> result = new HashMap<>();
+        for(Schema schema : getSchemas().getSchema()) {
+            for(Table table : schema.getTable()) {
+                result.put(table.getName(), table.getResolution().intValue());
+            }
+        }
+        return result;
     }
 
     public void optimize() {

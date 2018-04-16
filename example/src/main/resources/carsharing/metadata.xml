@@ -7,7 +7,7 @@
         <friendlyName>Battery level</friendlyName>
         <offeredMetric>
             <name>avg</name>
-            <calculation>sum(battery_level)/sum(samples_sum)</calculation>
+            <calculation>sum(${kpi})/sum(${table}samples_sum)</calculation>
             <friendlyName>Average</friendlyName>
             <description></description>
         </offeredMetric>
@@ -21,13 +21,13 @@
         <friendlyName>Estimated kilometers</friendlyName>
         <offeredMetric>
             <name>sum</name>
-            <calculation>sum(estimated_km)</calculation>
+            <calculation>sum(${kpi})</calculation>
             <friendlyName>Sum</friendlyName>
             <description></description>
         </offeredMetric>
         <offeredMetric>
             <name>avg</name>
-            <calculation>sum(estimated_km)/sum(samples_sum)</calculation>
+            <calculation>sum(${kpi})/sum(${table}samples_sum)</calculation>
             <friendlyName>Average</friendlyName>
             <description></description>
         </offeredMetric>
@@ -41,7 +41,7 @@
         <friendlyName>Number of cars</friendlyName>
         <offeredMetric>
             <name>sum</name>
-            <calculation>sum(samples_sum)</calculation>
+            <calculation>sum(${kpi}_sum)</calculation>
             <friendlyName>Sum</friendlyName>
             <description></description>
         </offeredMetric>
@@ -50,6 +50,11 @@
             <datatype>INT8</datatype>
         </column>
     </kpi>
+    <dimension>
+        <name>start_time</name>
+        <friendlyName>Timestamp</friendlyName>
+        <datatype>INT32</datatype>
+    </dimension>
     <dimension>
         <name>timestamp</name>
         <friendlyName>Timestamp</friendlyName>

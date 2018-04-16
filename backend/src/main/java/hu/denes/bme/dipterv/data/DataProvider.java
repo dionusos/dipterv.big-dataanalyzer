@@ -31,10 +31,14 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -48,32 +52,75 @@ public class DataProvider {
 
     Map<String, ResultSetExtractor> typeToExtractor = new HashMap<>();
 
+    private boolean isTimeSeriesQuery = false;
+    private static Set<String> NEGATIVE_START_TIME = new HashSet<>(Arrays.asList("start_time"));
+    private static Set<String> EMPTY_NEGATIVE = Collections.emptySet();
+
+    List<DimensionDef> extractDimensionsIntoQuery(DataRequest request, MeasurementDataSource ds, Query q, Set<String> negative) {
+        if(negative == null) {
+            negative = Collections.emptySet();
+        }
+        List<DimensionDef> requestdDimensions = new ArrayList<>();
+        if(request.getDimensions() != null) {
+            for (DimensionRequest dr : request.getDimensions()) {
+                if(negative.contains(dr.getName())) {
+                    continue;
+                }
+                DimensionDef dd = ds.getDimensionFor(dr.getName());
+                q.addDimension(dd);
+                requestdDimensions.add(dd);
+            }
+        }
+        return requestdDimensions;
+    }
+
+    private List<ResultSetExtractor> extractExtractors(DataRequest request, MeasurementDataSource ds) {
+        List<ResultSetExtractor> extractors = new ArrayList<>();
+        if(request.getDimensions() != null) {
+            for (DimensionRequest dr : request.getDimensions()) {
+                DimensionDef dd = ds.getDimensionFor(dr.getName());
+                extractors.add(typeToExtractor.get(dd.getDatatype()));
+            }
+        }
+        return extractors;
+    }
+
+    private List<DataResponseHeader> extractHeaderInformation(DataRequest request) {
+        List<DataResponseHeader> header = new ArrayList<>();
+        if(request.getDimensions() != null) {
+            for (DimensionRequest dr : request.getDimensions()) {
+                header.add(new DataResponseHeader().dimension(dr.getName()));
+            }
+        }
+        return header;
+    }
+
     public DataResponse getData(final DataRequest request) {
+        deterMineIfTimeSeries(request);
         List<ResultSetExtractor> extractors = new ArrayList<>();
         extractors.add(new StringResultSetExtractor());
 
         MeasurementDataSource ds = metadataProvider.getMeasurementDataSourceByName(request.getDatasource());
         Query q = createQuery(ds);
+        Query inner = createQuery(ds);
         List<KpiDef> requestdKpis = new ArrayList<>();
         List<DimensionDef> requestdDimensions = new ArrayList<>();
 
         DataResponse response = new DataResponse();
-        List<DataResponseHeader> header = new ArrayList<>();
-
-        if(request.getDimensions() != null) {
-            for (DimensionRequest dr : request.getDimensions()) {
-                DimensionDef dd = ds.getDimensionFor(dr.getName());
-                q.addDimension(dd);
-                header.add(new DataResponseHeader().dimension(dr.getName()));
-                requestdDimensions.add(dd);
-                extractors.add(typeToExtractor.get(dd.getDatatype()));
-            }
+        List<DataResponseHeader> header = extractHeaderInformation(request);
+        extractors.addAll(extractExtractors(request, ds));
+        if(isTimeSeriesQuery) {
+            extractDimensionsIntoQuery(request, ds, inner, NEGATIVE_START_TIME);
         }
+        extractDimensionsIntoQuery(request, ds, q, EMPTY_NEGATIVE);
 
         if(request.getKpis() != null) {
             for (KpiRequest kpi : request.getKpis()) {
                 KpiDef kDef = ds.getKpiFor(kpi.getName(), kpi.getOfferedMetric());
                 q.addKpi(kDef, kpi.getOfferedMetric());
+                if(isTimeSeriesQuery) {
+                    inner.addKpi(kDef, kpi.getOfferedMetric());
+                }
                 header.add(new DataResponseHeader().kpi(kpi.getName()).offeredMetric(kpi.getOfferedMetric()));
                 requestdKpis.add(kDef);
                 extractors.add(typeToExtractor.get("DOUBLE"));
@@ -192,31 +239,67 @@ public class DataProvider {
         }
 
         if(request.getLimit() != null && request.getLimit() > 0) {
-            q.setLimit(request.getLimit());
+            if(isTimeSeriesQuery) {
+                inner.setLimit(request.getLimit());
+            } else {
+                q.setLimit(request.getLimit());
+            }
         }
 
-        if(request.getOrders() != null) {
-            for(OrderRequest o : request.getOrders()) {
-                String direction;
-                if(o.getDirection() != null && o.getDirection().equals("DESC")) {
-                    direction = "DESC";
-                } else {
-                    direction = "ASC";
-                }
-                if(o.getDimension() != null) {
-                    q.addOrder(o.getDimension(), direction);
-                } else {
-                    KpiDef kDef = ds.getKpiFor(o.getKpi().getName(), o.getKpi().getOfferedMetric());
-                    q.addOrder(kDef, o.getKpi().getOfferedMetric(), direction);
-                }
+        Query queryToSetOrder = q;
+        if(isTimeSeriesQuery) {
+            queryToSetOrder = inner;
+        }
+        if(isTimeSeriesQuery) {
+            if (request.getOrders() != null) {
+                for (OrderRequest o : request.getOrders()) {
+                    String direction;
+                    if (o.getDirection() != null && o.getDirection().equals("DESC")) {
+                        direction = "DESC";
+                    } else {
+                        direction = "ASC";
+                    }
+                    if (o.getDimension() != null) {
+                        if("start_time".equals(o.getDimension())) {
+                            continue;
+                        }
+                        queryToSetOrder.addOrder(o.getDimension(), direction);
+                    } else {
+                        KpiDef kDef = ds.getKpiFor(o.getKpi().getName(), o.getKpi().getOfferedMetric());
+                        queryToSetOrder.addOrder(kDef, o.getKpi().getOfferedMetric(), direction);
+                    }
 
+                }
             }
+        } else {
+            if (request.getOrders() != null) {
+                for (OrderRequest o : request.getOrders()) {
+                    String direction;
+                    if (o.getDirection() != null && o.getDirection().equals("DESC")) {
+                        direction = "DESC";
+                    } else {
+                        direction = "ASC";
+                    }
+                    if (o.getDimension() != null) {
+                        queryToSetOrder.addOrder(o.getDimension(), direction);
+                    } else {
+                        KpiDef kDef = ds.getKpiFor(o.getKpi().getName(), o.getKpi().getOfferedMetric());
+                        queryToSetOrder.addOrder(kDef, o.getKpi().getOfferedMetric(), direction);
+                    }
+
+                }
+            }
+        }
+        if(isTimeSeriesQuery){
+            q.join(inner, inner.getDimensions());
         }
 
         response.setHeader(header);
 
-        q.setSchema(ds.getShemasContaining(requestdKpis, requestdDimensions).get(0).getName());
-        q.setTable(ds.getSchemas().getSchema().get(0).getTable().get(0).getName());
+        q.setSchema(ds.getShemasContaining(requestdKpis, requestdDimensions).get(1).getName());
+        q.setTable(ds.getSchemas().getSchema().get(1).getTable().get(2).getName());
+        inner.setSchema(q.getSchema());
+        inner.setTable(q.getTable());
 
         Connection conn = null;
         try {
@@ -250,6 +333,21 @@ public class DataProvider {
             }
         }
         return response;
+    }
+
+    private void deterMineIfTimeSeries(DataRequest request) {
+        if(request.getDimensions() != null){
+            if(request.getDimensions().size() < 2) {
+                request.limit(null);
+                return;
+            }
+            for(DimensionRequest dr : request.getDimensions()) {
+                if("start_time".equals(dr.getName())) {
+                    this.isTimeSeriesQuery = true;
+                    return;
+                }
+            }
+        }
     }
 
     private Query createQuery(MeasurementDataSource mds) {

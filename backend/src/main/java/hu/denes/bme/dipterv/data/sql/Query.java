@@ -1,5 +1,6 @@
 package hu.denes.bme.dipterv.data.sql;
 
+import com.mysql.cj.x.protobuf.MysqlxDatatypes;
 import hu.denes.bme.dipterv.metadata.DimensionDef;
 import hu.denes.bme.dipterv.metadata.KpiDef;
 import hu.denes.bme.dipterv.metadata.MetadataProvider;
@@ -7,8 +8,11 @@ import hu.denes.bme.dipterv.metadata.OfferedMetric;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Query {
+    private static final AtomicInteger ID = new AtomicInteger(0);
+    private String queryName;
     private String url;
     private String user;
     private String password;
@@ -18,14 +22,23 @@ public class Query {
     private String schema;
     private String table;
     protected Integer limit;
+    private List<String> dimensions = new ArrayList<>();
+    private boolean useTable = true;
+    private Query joined = null;
+    private List<String> joinedDimensions = null;
 
     private MetadataProvider metadataProvider;
     protected Expression where;
     private Expression having;
 
+    public Query() {
+        ID.set(ID.incrementAndGet() % 1000);
+        queryName = "q" + ID.get();
+    }
+
     public void addKpi(KpiDef kDef, String offeredMetric){
         String calculation = getCalculationFor(kDef, offeredMetric);
-        Select s = new Select(calculation, kDef.getName() + "_" + offeredMetric);
+        Select s = new Select(calculation.replace("${kpi}", "${table}" + kDef.getName()), kDef.getName() + "_" + offeredMetric);
         selects.add(s);
     }
 
@@ -33,7 +46,7 @@ public class Query {
         String calculation = "";
         for(OfferedMetric om : kDef.getOfferedMetric()){
             if(om.getName().equals(offeredMetric)){
-                calculation = om.getCalculation();
+                calculation = om.getCalculation().replace("${kpi}", "${table}" + kDef.getName());
                 break;
             }
         }
@@ -41,8 +54,9 @@ public class Query {
     }
 
     public void addDimension(DimensionDef dim) {
-        selects.add(new Select(dim.getName(), dim.getName()));
-        groupBys.add(dim.getName());
+        selects.add(new Select("${table}" + dim.getName(), dim.getName()));
+        groupBys.add("${table}" + dim.getName());
+        dimensions.add(dim.getName());
     }
 
     public String getUrl() {
@@ -100,10 +114,30 @@ public class Query {
         } else {
             sb.append(table);
         }
+        sb.append(" " + queryName + " ");
 
         if(where != null && !where.toString().isEmpty()) {
             sb.append(" WHERE ");
             sb.append(where.toString());
+        }
+
+        if(joined != null && joinedDimensions != null) {
+            sb.append(" JOIN ").append("(").append(joined.toString()).append(") ").append(joined.queryName);
+
+            if(joinedDimensions.size() > 0) {
+                sb.append(" ON ");
+                Iterator<String> dIt = joinedDimensions.iterator();
+                while (dIt.hasNext()) {
+                    String d = dIt.next();
+                    sb.append("(").append(queryName).append(".").append(d).append(" = ").append(joined.queryName + ".").append(d);
+                    sb.append(" OR (");
+                    sb.append(queryName).append(".").append(d).append(" IS NULL AND ").append(joined.queryName + ".").append(d).append(" IS NULL)");
+                    sb.append(")");
+                    if (dIt.hasNext()) {
+                        sb.append(", ");
+                    }
+                }
+            }
         }
 
         if(groupBys.size() > 0) {
@@ -135,7 +169,7 @@ public class Query {
             }
         }
 
-        return sb.toString();
+        return useTable ? sb.toString().replace("${table}", queryName + ".") : sb.toString().replace("${table}", "");
     }
 
     public void setSchema(String schema) {
@@ -165,5 +199,26 @@ public class Query {
     public void addOrder(KpiDef kDef, String offeredMetric, String direction) {
         String calculation = getCalculationFor(kDef, offeredMetric);
         orderBys.add(new OrderBy(calculation, direction));
+    }
+
+    public List<String> getDimensions() {
+        return dimensions;
+    }
+
+    public void join(Query inner, List<String> dimensions) {
+        this.joined = inner;
+        joinedDimensions = dimensions;
+    }
+
+    private String enrichQName(String value){
+        return queryName + "." + value;
+    }
+
+    public String getSchema() {
+        return schema;
+    }
+
+    public String getTable() {
+        return table;
     }
 }

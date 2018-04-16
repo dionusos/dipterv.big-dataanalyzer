@@ -425,16 +425,18 @@ public class DataProvider {
 
     private void deterMineIfTimeSeries(DataRequest request) {
         if(request.getDimensions() != null){
-            if(request.getDimensions().size() < 2) {
-                request.limit(null);
-                return;
-            }
             for(DimensionRequest dr : request.getDimensions()) {
                 if("start_time".equals(dr.getName())) {
                     this.isTimeSeriesQuery = true;
-                    return;
+                    break;
                 }
             }
+            if(isTimeSeriesQuery && request.getDimensions().size() < 2) {
+                isTimeSeriesQuery = false;
+                request.limit(null);
+                return;
+            }
+
         }
     }
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import * as model from '../model/Model.js';
+import * as model from '../../model/Model.js';
 import './DrilldownDimensionSelector.css'
 
 class DrilldownDimensionSelector extends React.Component {

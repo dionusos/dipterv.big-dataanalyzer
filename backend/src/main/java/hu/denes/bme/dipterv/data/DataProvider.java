@@ -272,7 +272,8 @@ public class DataProvider {
             while (rs.next()) {
                 List<Object> row = new ArrayList<>();
                 for(int i = 1; i <= response.getHeader().size(); ++i) {
-                    row.add(extractors.get(i).extract(rs, i));
+                    Object val = extractors.get(i).extract(rs, i);
+                    row.add(val == null ? "N/A" : val);
                 }
                 mx.add(row);
             }

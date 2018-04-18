@@ -1,4 +1,4 @@
-import {CREATE_MEASUREMENT} from "../actions/metadata-actions";
+import {CREATE_DRILLDOWN, CREATE_MEASUREMENT} from "../actions/metadata-actions";
 import {
     FILL_DRILLDOWN, ADD_FILTER, REMOVE_FILTER, DELETE_DRILLDOWN,
     UPDATE_DRILLDOWN_LIMIT, UPDATE_DRILLDOWN_CHART_TYPE
@@ -13,6 +13,15 @@ export default function dataReducer(state={}, {type, payload}) {
                 newState.measurements = [];
             }
             newState.measurements.push(payload);
+            return newState;
+        case (CREATE_DRILLDOWN):
+            for(var i = 0; i < newState.measurements.length; ++i) {
+                let m = newState.measurements[i];
+                if(m.id === payload.measurement.id) {
+                   m.drilldowns.push(payload);
+                    break;
+                }
+            }
             return newState;
         case (FILL_DRILLDOWN):
             let ddId = payload.drilldownId;

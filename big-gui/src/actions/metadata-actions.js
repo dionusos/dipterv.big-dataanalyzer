@@ -8,6 +8,7 @@ export const UPDATE_SELECTED_KPIS = 'metadata:updateSelectedKpis';
 export const UPDATE_SELECTED_DIMENSIONS = 'metadata:updateSelectedDimensions';
 export const UPDATE_SELECTED_DATASOURCE = 'metadata:updateSelectedDatasource';
 export const CREATE_MEASUREMENT = 'metadata:createMeasurement';
+export const CREATE_DRILLDOWN = 'metadata:createDrilldownt';
 
 export function updateDataSources(datasources) {
     return {
@@ -101,5 +102,12 @@ export function createMeasurement(measurement) {
     return {
         type: CREATE_MEASUREMENT,
         payload: measurement
+    }
+}
+
+export function createDrilldown(drilldown) {
+    return {
+        type: CREATE_DRILLDOWN,
+        payload: drilldown
     }
 }

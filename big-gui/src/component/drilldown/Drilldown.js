@@ -6,6 +6,8 @@ import {GoogleCharts} from "google-charts";
 import {changeChartType, changeDrilldownLimit, deleteDrilldown, loadData} from "../../actions/data-actions";
 import {connect} from "react-redux";
 import {dataQueryFromDrilldown} from "../../util/util";
+import {LIMIT_DEFAULT} from "../../config/config";
+import {createDrilldown} from "../../actions/metadata-actions";
 
 class Drilldown extends React.Component {
     constructor(props){
@@ -17,6 +19,9 @@ class Drilldown extends React.Component {
         this.onLoadMeasurementData = this.onLoadMeasurementData.bind(this);
         this.onDrilldownLimitChanged = this.onDrilldownLimitChanged.bind(this);
         this.onChartTypeSelected = this.onChartTypeSelected.bind(this);
+        this.onDrilldownDimensionSelected = this.onDrilldownDimensionSelected.bind(this);
+        this.onChartDimensionSelected = this.onChartDimensionSelected.bind(this);
+        this.doDrilldown = this.doDrilldown.bind(this);
     }
 
     onDeleteDrilldown() {
@@ -42,6 +47,61 @@ class Drilldown extends React.Component {
         this.setState(newStateFilter);
     }
 
+    onDrilldownDimensionSelected(event) {
+        let newStateFilter = {};
+        Object.assign(newStateFilter, this.state);
+        newStateFilter.selectedDrilldownDimensions = this.determineSelected(event);
+        this.setState(newStateFilter);
+    }
+
+    onChartDimensionSelected(selection) {
+        console.info(selection);
+        console.info(this.props.drilldown.dataMatrix[selection[0].row][0]);
+        let newStateFilter = {};
+        Object.assign(newStateFilter, this.state);
+        newStateFilter.selectedChartDimension = this.props.drilldown.dataMatrix[selection[0].row][0];
+        this.setState(newStateFilter);
+    }
+
+    determineSelected(event) {
+        var selected = [];
+        for (var i = 0; i < event.target.options.length; ++i) {
+            if (event.target.options[i].selected) {
+                selected.push(event.target.options[i].value);
+            }
+        }
+        return selected;
+    }
+
+    doDrilldown() {
+        let parent = this.props.drilldown;
+        let drilldown = {};
+        drilldown.id = {measurementId: parent.measurement.id, id: (parent.id.id + 1)};
+        drilldown.measurement = parent.measurement;
+        drilldown.limit = parent.limit;
+        drilldown.dimensions = [];
+        for(var j =0; j < this.state.selectedDrilldownDimensions.length; ++j){
+            drilldown.dimensions.push({name: this.state.selectedDrilldownDimensions[j]});
+        }
+        drilldown.chartType = parent.chartType;
+        drilldown.filters = [];
+        for(var i = 0; i < parent.dimensions.length; ++i) {
+            let dim = parent.dimensions[i];
+            let val = this.state.selectedChartDimension.split(",")[i];
+            drilldown.filters.push({dimension: dim.name, values:[val], isNegative: false});
+        }
+        this.props.onCreateDrilldown(drilldown);
+
+        let dataQuery = dataQueryFromDrilldown(drilldown);
+        var filters = drilldown.measurement.filters;
+        for(var i = 0; i < drilldown.measurement.drilldowns.length; ++i) {
+            let d = drilldown.measurement.drilldowns[i];
+            filters = filters.concat(d.filters);
+        }
+        dataQuery.filters = filters;
+        this.props.onLoadMeasurementData(dataQuery);
+    }
+
     render() {
         this.drawChart(this);
         return (
@@ -65,6 +125,16 @@ class Drilldown extends React.Component {
                             <Input type="number" name="limit" id="limitInput" placeholder={this.props.drilldown.limit} min="1" onChange={this.onDrilldownLimitChanged}/>
                             <Button onClick={this.onLoadMeasurementData}>Update</Button>
                             <Button onClick={this.onDeleteDrilldown}>Delete</Button>
+                        </Collapse>
+                        <Collapse isOpen={this.state.selectedChartDimension != null}>
+                            <Input type="select" className="dimensionsSelector"  onChange={this.onDrilldownDimensionSelected} multiple>
+                                {
+                                    this.props.drilldown.measurement.datasourceDimensions.map((dimension) => (
+                                        <option value={dimension.name}>{dimension.displayName}</option>
+                                    ))
+                                }
+                            </Input>
+                            <Button onClick={this.doDrilldown}>Drilldown</Button>
                         </Collapse>
                     </CardBody>
                 </Card>
@@ -97,36 +167,8 @@ class Drilldown extends React.Component {
         drilldown.chart = chart;
         chart.draw(data, options);
 
-        GoogleCharts.api.visualization.events.addListener(chart, 'select', function() {
-            var selection = drilldown.chart.getSelection();
-            if (selection === undefined || selection.length == 0) {
-
-                return;
-            }
-            var r = drilldown.dataMatrix[selection[0].row];
-            // Get the modal
-            var modal = document.getElementById('myModal' + drilldown.measurementId);
-
-            // Get the <span> element that closes the modal
-            // var span = document.getElementsByClassName("close)[0];
-
-            modal.style.display = "block";
-
-            // When the user clicks on <span> (x), close the modal
-            /* span.onclick = function() {
-                 modal.style.display = "none";
-             }*/
-
-            // When the user clicks anywhere outside of the modal, close it
-            window.onclick = function (event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
-                }
-            }
-
-            var fixedDimensionAndValue = document.getElementsByClassName("fixedDimensionAndValue" + drilldown.measurementId)[0];
-            fixedDimensionAndValue.innerHTML = header[0] + "=" + r[0];
-
+        GoogleCharts.api.visualization.events.addListener(chart, 'select', function(){
+            context.onChartDimensionSelected(chart.getSelection());
         });
     }
 
@@ -153,7 +195,8 @@ const mapActionsToProps = {
     onDeleteDrilldown: deleteDrilldown,
     onLoadMeasurementData: loadData,
     onDrilldownLimitChanged: changeDrilldownLimit,
-    onChartTypeSelected: changeChartType
+    onChartTypeSelected: changeChartType,
+    onCreateDrilldown: createDrilldown
 }
 
 export default connect(mapStateToProps, mapActionsToProps)(Drilldown);
